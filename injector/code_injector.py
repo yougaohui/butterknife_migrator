@@ -1,0 +1,265 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+代码注入器
+将初始化语句插入到 onCreate() 或 onViewCreated() 方法体中
+支持定位方法块、插入语句、避免重复
+"""
+
+import re
+from typing import Dict, Any, List, Optional, Tuple
+
+
+class CodeInjector:
+    """代码注入器类"""
+    
+    def __init__(self):
+        # 编译正则表达式
+        self.onCreate_pattern = re.compile(
+            r'(\s*@Override\s*\n\s*protected\s+void\s+onCreate\s*\([^)]*\)\s*\{)',
+            re.MULTILINE
+        )
+        
+        self.onViewCreated_pattern = re.compile(
+            r'(\s*@Override\s*\n\s*public\s+void\s+onViewCreated\s*\([^)]*\)\s*\{)',
+            re.MULTILINE
+        )
+        
+        self.method_body_pattern = re.compile(
+            r'(\s*@Override\s*\n\s*(?:public|private|protected)\s+(?:static\s+)?\w+\s+\w+\s*\([^)]*\)\s*\{)',
+            re.MULTILINE
+        )
+        
+        self.class_end_pattern = re.compile(
+            r'(\s*)\}\s*$',
+            re.MULTILINE
+        )
+    
+    def inject(self, code: str, parsed_data: Dict[str, Any]) -> str:
+        """注入初始化代码"""
+        if not parsed_data.get('has_butterknife', False):
+            return code
+        
+        # 获取需要注入的代码
+        injection_code = self._generate_injection_code(parsed_data)
+        
+        if not injection_code:
+            return code
+        
+        # 尝试在现有方法中注入
+        code = self._inject_in_existing_methods(code, injection_code)
+        
+        # 如果没有找到合适的方法，创建新的初始化方法
+        if not self._has_injection_code(code, injection_code):
+            code = self._create_initialization_method(code, injection_code)
+        
+        return code
+    
+    def _generate_injection_code(self, parsed_data: Dict[str, Any]) -> str:
+        """生成需要注入的代码"""
+        lines = []
+        
+        # 添加findViewById初始化代码
+        bind_views = parsed_data.get('bind_views', [])
+        if bind_views:
+            lines.append("        // 初始化View绑定")
+            for bind_view in bind_views:
+                field_name = bind_view['name']
+                resource_id = bind_view['id']
+                field_type = bind_view['type']
+                
+                line = f"        {field_name} = ({field_type}) findViewById({resource_id});"
+                lines.append(line)
+            lines.append("")
+        
+        # 添加OnClickListener初始化代码
+        on_clicks = parsed_data.get('on_clicks', [])
+        if on_clicks:
+            lines.append("        // 初始化点击事件")
+            for on_click in on_clicks:
+                resource_ids = on_click['ids']
+                method_name = on_click['method']
+                
+                for resource_id in resource_ids:
+                    # 查找对应的View变量名
+                    view_name = self._find_view_name_for_resource_id(resource_id, bind_views)
+                    
+                    if view_name:
+                        lines.append(f"        {view_name}.setOnClickListener(new View.OnClickListener() {{")
+                        lines.append(f"            @Override")
+                        lines.append(f"            public void onClick(View v) {{")
+                        lines.append(f"                {method_name}(v);")
+                        lines.append(f"            }}")
+                        lines.append(f"        }});")
+                        lines.append("")
+        
+        return '\n'.join(lines)
+    
+    def _find_view_name_for_resource_id(self, resource_id: str, bind_views: List[Dict[str, Any]]) -> Optional[str]:
+        """根据资源ID查找对应的View变量名"""
+        for bind_view in bind_views:
+            if bind_view['id'] == resource_id:
+                return bind_view['name']
+        
+        # 如果没有找到，返回一个默认名称
+        return f"view_{resource_id.split('.')[-1]}"
+    
+    def _inject_in_existing_methods(self, code: str, injection_code: str) -> str:
+        """在现有方法中注入代码"""
+        # 1. 尝试在onCreate方法中注入
+        code = self._inject_in_method(code, injection_code, self.onCreate_pattern, "onCreate")
+        
+        # 2. 尝试在onViewCreated方法中注入
+        if not self._has_injection_code(code, injection_code):
+            code = self._inject_in_method(code, injection_code, self.onViewCreated_pattern, "onViewCreated")
+        
+        # 3. 尝试在其他合适的方法中注入
+        if not self._has_injection_code(code, injection_code):
+            code = self._inject_in_any_method(code, injection_code)
+        
+        return code
+    
+    def _inject_in_method(self, code: str, injection_code: str, pattern: re.Pattern, method_name: str) -> str:
+        """在指定方法中注入代码"""
+        match = pattern.search(code)
+        if not match:
+            return code
+        
+        # 找到方法开始位置
+        method_start = match.end()
+        
+        # 查找方法体结束位置
+        method_end = self._find_method_end(code, method_start)
+        
+        if method_end > method_start:
+            # 在方法体结束前插入代码
+            before_end = code[:method_end]
+            after_end = code[method_end:]
+            
+            # 检查是否已经有注入的代码
+            if not self._has_injection_code(before_end, injection_code):
+                return before_end + '\n' + injection_code + '\n    ' + after_end
+        
+        return code
+    
+    def _inject_in_any_method(self, code: str, injection_code: str) -> str:
+        """在任何合适的方法中注入代码"""
+        # 查找所有方法
+        methods = list(self.method_body_pattern.finditer(code))
+        
+        for method in methods:
+            method_start = method.end()
+            method_end = self._find_method_end(code, method_start)
+            
+            if method_end > method_start:
+                # 检查方法是否合适（不是getter/setter等）
+                method_content = code[method_start:method_end]
+                if self._is_suitable_method_for_injection(method_content):
+                    # 在方法体结束前插入代码
+                    before_end = code[:method_end]
+                    after_end = code[method_end:]
+                    
+                    # 检查是否已经有注入的代码
+                    if not self._has_injection_code(before_end, injection_code):
+                        return before_end + '\n' + injection_code + '\n    ' + after_end
+        
+        return code
+    
+    def _find_method_end(self, code: str, start_pos: int) -> int:
+        """查找方法体结束位置"""
+        brace_count = 0
+        in_string = False
+        string_char = None
+        
+        for i, char in enumerate(code[start_pos:], start_pos):
+            if char == '"' or char == "'":
+                if not in_string:
+                    in_string = True
+                    string_char = char
+                elif char == string_char:
+                    in_string = False
+                    string_char = None
+                continue
+            
+            if in_string:
+                continue
+            
+            if char == '{':
+                brace_count += 1
+            elif char == '}':
+                brace_count -= 1
+                if brace_count == 0:
+                    return i + 1
+        
+        return start_pos
+    
+    def _is_suitable_method_for_injection(self, method_content: str) -> bool:
+        """检查方法是否适合注入初始化代码"""
+        # 排除getter/setter方法
+        if re.search(r'get[A-Z]|set[A-Z]', method_content):
+            return False
+        
+        # 排除构造函数
+        if re.search(r'public\s+\w+\s*\(', method_content):
+            return False
+        
+        # 排除私有方法
+        if re.search(r'private\s+\w+\s+\w+\s*\(', method_content):
+            return False
+        
+        return True
+    
+    def _create_initialization_method(self, code: str, injection_code: str) -> str:
+        """创建新的初始化方法"""
+        # 查找类的结束位置
+        match = self.class_end_pattern.search(code)
+        if not match:
+            return code
+        
+        # 在类结束前添加初始化方法
+        method_code = f"""
+    private void initializeViews() {{
+{injection_code}
+    }}
+"""
+        
+        before_end = code[:match.start()]
+        after_end = code[match.start():]
+        
+        return before_end + method_code + after_end
+    
+    def _has_injection_code(self, code: str, injection_code: str) -> bool:
+        """检查是否已经包含注入的代码"""
+        if not injection_code:
+            return True
+        
+        # 检查关键代码片段是否已经存在
+        key_lines = []
+        for line in injection_code.split('\n'):
+            line = line.strip()
+            if line and not line.startswith('//'):
+                key_lines.append(line)
+        
+        for key_line in key_lines:
+            if key_line not in code:
+                return False
+        
+        return True
+    
+    def get_injection_info(self, parsed_data: Dict[str, Any]) -> Dict[str, Any]:
+        """获取注入信息"""
+        info = {
+            'has_butterknife': parsed_data.get('has_butterknife', False),
+            'bind_views_count': len(parsed_data.get('bind_views', [])),
+            'on_clicks_count': len(parsed_data.get('on_clicks', [])),
+            'injection_methods': []
+        }
+        
+        if info['has_butterknife']:
+            if info['bind_views_count'] > 0:
+                info['injection_methods'].append('findViewById初始化')
+            
+            if info['on_clicks_count'] > 0:
+                info['injection_methods'].append('OnClickListener设置')
+        
+        return info

@@ -1,0 +1,290 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+ButterKnife注解解析器
+使用正则表达式提取ButterKnife注解信息
+输出结构化数据
+"""
+
+import re
+from typing import Dict, List, Optional, Tuple
+
+
+class ButterKnifeParser:
+    """ButterKnife注解解析器类"""
+    
+    def __init__(self):
+        # 编译正则表达式以提高性能
+        self.bind_view_pattern = re.compile(
+            r'@BindView\s*\(\s*(R\.id\.\w+)\s*\)\s*(\w+)\s+(\w+)\s*;',
+            re.MULTILINE
+        )
+        
+        self.on_click_pattern = re.compile(
+            r'@OnClick\s*\(\s*\{\s*((?:R\.id\.\w+(?:\s*,\s*R\.id\.\w+)*)?)\s*\}\s*\)\s*public\s+void\s+(\w+)\s*\(',
+            re.MULTILINE
+        )
+        
+        self.bind_call_pattern = re.compile(
+            r'ButterKnife\.bind\s*\(\s*this\s*\)\s*;',
+            re.MULTILINE
+        )
+        
+        self.import_pattern = re.compile(
+            r'import\s+butterknife\.BindView\s*;',
+            re.MULTILINE
+        )
+        
+        self.onclick_import_pattern = re.compile(
+            r'import\s+butterknife\.OnClick\s*;',
+            re.MULTILINE
+        )
+        
+        self.butterknife_import_pattern = re.compile(
+            r'import\s+butterknife\.ButterKnife\s*;',
+            re.MULTILINE
+        )
+        
+        self.class_pattern = re.compile(
+            r'class\s+(\w+)(?:\s+extends\s+(\w+))?(?:\s+implements\s+([^{]+))?',
+            re.MULTILINE
+        )
+        
+        self.method_pattern = re.compile(
+            r'(?:public|private|protected)?\s*(?:static\s+)?(?:final\s+)?\w+\s+(\w+)\s*\([^)]*\)\s*\{',
+            re.MULTILINE
+        )
+    
+    def parse(self, content: str) -> Dict:
+        """解析Java文件内容，提取ButterKnife注解信息"""
+        result = {
+            'has_butterknife': False,
+            'bind_views': [],
+            'on_clicks': [],
+            'bind_call': False,
+            'imports': {
+                'bindview': False,
+                'onclick': False,
+                'butterknife': False
+            },
+            'class_info': {},
+            'methods': []
+        }
+        
+        try:
+            # 检查是否包含ButterKnife注解
+            if self._has_butterknife_annotations(content):
+                result['has_butterknife'] = True
+                
+                # 解析@BindView注解
+                result['bind_views'] = self._parse_bind_views(content)
+                
+                # 解析@OnClick注解
+                result['on_clicks'] = self._parse_on_clicks(content)
+                
+                # 检查ButterKnife.bind调用
+                result['bind_call'] = self._has_bind_call(content)
+                
+                # 检查import语句
+                result['imports'] = self._parse_imports(content)
+                
+                # 解析类信息
+                result['class_info'] = self._parse_class_info(content)
+                
+                # 解析方法信息
+                result['methods'] = self._parse_methods(content)
+        
+        except Exception as e:
+            print(f"解析ButterKnife注解时出错: {e}")
+        
+        return result
+    
+    def _has_butterknife_annotations(self, content: str) -> bool:
+        """检查是否包含ButterKnife注解"""
+        return (
+            '@BindView' in content or
+            '@OnClick' in content or
+            'ButterKnife.bind' in content
+        )
+    
+    def _parse_bind_views(self, content: str) -> List[Dict]:
+        """解析@BindView注解"""
+        bind_views = []
+        matches = self.bind_view_pattern.findall(content)
+        
+        for match in matches:
+            resource_id, field_type, field_name = match
+            bind_views.append({
+                'id': resource_id.strip(),
+                'type': field_type.strip(),
+                'name': field_name.strip(),
+                'original_line': self._find_original_line(content, match[0])
+            })
+        
+        return bind_views
+    
+    def _parse_on_clicks(self, content: str) -> List[Dict]:
+        """解析@OnClick注解"""
+        on_clicks = []
+        matches = self.on_click_pattern.findall(content)
+        
+        for match in matches:
+            resource_ids_str, method_name = match
+            
+            # 解析资源ID列表
+            if resource_ids_str.strip():
+                resource_ids = [
+                    rid.strip() for rid in resource_ids_str.split(',')
+                ]
+            else:
+                resource_ids = []
+            
+            on_clicks.append({
+                'ids': resource_ids,
+                'method': method_name.strip(),
+                'original_line': self._find_original_line(content, match[0])
+            })
+        
+        return on_clicks
+    
+    def _has_bind_call(self, content: str) -> bool:
+        """检查是否包含ButterKnife.bind调用"""
+        return bool(self.bind_call_pattern.search(content))
+    
+    def _parse_imports(self, content: str) -> Dict[str, bool]:
+        """解析import语句"""
+        return {
+            'bindview': bool(self.import_pattern.search(content)),
+            'onclick': bool(self.onclick_import_pattern.search(content)),
+            'butterknife': bool(self.butterknife_import_pattern.search(content))
+        }
+    
+    def _parse_class_info(self, content: str) -> Dict:
+        """解析类信息"""
+        class_info = {}
+        match = self.class_pattern.search(content)
+        
+        if match:
+            class_info = {
+                'name': match.group(1),
+                'extends': match.group(2) if match.group(2) else None,
+                'implements': match.group(3).strip() if match.group(3) else None
+            }
+        
+        return class_info
+    
+    def _parse_methods(self, content: str) -> List[str]:
+        """解析方法信息"""
+        methods = []
+        matches = self.method_pattern.findall(content)
+        
+        for match in matches:
+            method_name = match.strip()
+            if method_name and method_name not in methods:
+                methods.append(method_name)
+        
+        return methods
+    
+    def _find_original_line(self, content: str, pattern: str) -> Optional[str]:
+        """查找原始行内容"""
+        lines = content.split('\n')
+        
+        for line in lines:
+            if pattern in line:
+                return line.strip()
+        
+        return None
+    
+    def get_parsing_statistics(self, parsed_data: Dict) -> Dict:
+        """获取解析统计信息"""
+        stats = {
+            'total_bind_views': len(parsed_data.get('bind_views', [])),
+            'total_on_clicks': len(parsed_data.get('on_clicks', [])),
+            'has_bind_call': parsed_data.get('bind_call', False),
+            'imports_count': sum(parsed_data.get('imports', {}).values()),
+            'class_type': self._determine_class_type(parsed_data.get('class_info', {}))
+        }
+        
+        return stats
+    
+    def _determine_class_type(self, class_info: Dict) -> str:
+        """确定类类型"""
+        if not class_info:
+            return 'unknown'
+        
+        extends = class_info.get('extends', '')
+        implements = class_info.get('implements', '')
+        
+        if 'Activity' in extends:
+            return 'Activity'
+        elif 'Fragment' in extends:
+            return 'Fragment'
+        elif 'Adapter' in extends or 'Adapter' in implements:
+            return 'Adapter'
+        elif 'View' in extends:
+            return 'View'
+        else:
+            return 'Other'
+    
+    def validate_parsed_data(self, parsed_data: Dict) -> Tuple[bool, List[str]]:
+        """验证解析的数据"""
+        errors = []
+        
+        # 检查必需字段
+        if not parsed_data.get('has_butterknife'):
+            errors.append("未检测到ButterKnife注解")
+        
+        # 检查@BindView注解的完整性
+        for bind_view in parsed_data.get('bind_views', []):
+            if not all(key in bind_view for key in ['id', 'type', 'name']):
+                errors.append(f"@BindView注解信息不完整: {bind_view}")
+        
+        # 检查@OnClick注解的完整性
+        for on_click in parsed_data.get('on_clicks', []):
+            if not all(key in on_click for key in ['ids', 'method']):
+                errors.append(f"@OnClick注解信息不完整: {on_click}")
+        
+        return len(errors) == 0, errors
+
+
+class ParsingResult:
+    """解析结果类"""
+    
+    def __init__(self, parsed_data: Dict):
+        self.data = parsed_data
+        self.parser = ButterKnifeParser()
+    
+    def is_valid(self) -> bool:
+        """检查解析结果是否有效"""
+        is_valid, _ = self.parser.validate_parsed_data(self.data)
+        return is_valid
+    
+    def get_bind_views_count(self) -> int:
+        """获取@BindView注解数量"""
+        return len(self.data.get('bind_views', []))
+    
+    def get_on_clicks_count(self) -> int:
+        """获取@OnClick注解数量"""
+        return len(self.data.get('on_clicks', []))
+    
+    def has_bind_call(self) -> bool:
+        """是否有ButterKnife.bind调用"""
+        return self.data.get('bind_call', False)
+    
+    def get_class_type(self) -> str:
+        """获取类类型"""
+        return self.parser._determine_class_type(self.data.get('class_info', {}))
+    
+    def get_statistics(self) -> Dict:
+        """获取统计信息"""
+        return self.parser.get_parsing_statistics(self.data)
+    
+    def __str__(self) -> str:
+        """字符串表示"""
+        stats = self.get_statistics()
+        return f"""解析结果:
+类类型: {stats['class_type']}
+@BindView注解: {stats['total_bind_views']} 个
+@OnClick注解: {stats['total_on_clicks']} 个
+ButterKnife.bind调用: {'是' if stats['has_bind_call'] else '否'}
+"""
