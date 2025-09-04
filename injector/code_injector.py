@@ -40,9 +40,9 @@ class CodeInjector:
         if not parsed_data.get('has_butterknife', False):
             return code
         
-        # 检查是否继承自NewBaseActivity
+        # 检查是否继承自NewBaseActivity或NewBaseFragment
         if self._is_newbase_activity(code):
-            print("DEBUG: 检测到继承自NewBaseActivity，使用定制化处理")
+            print("DEBUG: 检测到继承自NewBaseActivity或NewBaseFragment，使用定制化处理")
             return self._inject_for_newbase_activity(code, parsed_data)
         
         # 获取需要注入的代码
@@ -150,11 +150,14 @@ class CodeInjector:
         }
     
     def _is_newbase_activity(self, code: str) -> bool:
-        """检查是否继承自NewBaseActivity"""
+        """检查是否继承自NewBaseActivity或NewBaseFragment"""
         newbase_patterns = [
             r'extends\s+NewBaseActivity',
             r'extends\s+\w*NewBaseActivity',
-            r'implements\s+.*NewBaseActivity'
+            r'extends\s+NewBaseFragment',
+            r'extends\s+\w*NewBaseFragment',
+            r'implements\s+.*NewBaseActivity',
+            r'implements\s+.*NewBaseFragment'
         ]
         
         for pattern in newbase_patterns:
@@ -164,7 +167,7 @@ class CodeInjector:
         return False
     
     def _inject_for_newbase_activity(self, code: str, parsed_data: Dict[str, Any]) -> str:
-        """为继承NewBaseActivity的类进行定制化注入"""
+        """为继承NewBaseActivity或NewBaseFragment的类进行定制化注入"""
         # 生成定制化注入代码
         injection_codes = self._generate_newbase_injection_code(parsed_data)
         
