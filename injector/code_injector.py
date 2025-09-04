@@ -182,36 +182,96 @@ class CodeInjector:
         # 生成定制化注入代码
         injection_codes = self._generate_newbase_injection_code(parsed_data)
         
-        # 创建initView和initListener方法
-        methods_to_add = []
-        
+        # 检查方法是否已存在，如果存在则更新，否则创建
         if injection_codes['init_view']:
-            init_view_method = f"""
-    @Override
-    protected void initView() {{
-{injection_codes['init_view']}
-    }}"""
-            methods_to_add.append(init_view_method)
+            if self._has_init_view_method(code):
+                print("DEBUG: initView方法已存在，更新其内容")
+                code = self._update_init_view_method(code, injection_codes['init_view'])
+            else:
+                print("DEBUG: 创建新的initView方法")
+                code = self._create_init_view_method(code, injection_codes['init_view'])
         
         if injection_codes['init_listener']:
-            init_listener_method = f"""
-    @Override
-    public void initListener() {{
-{injection_codes['init_listener']}
-    }}"""
-            methods_to_add.append(init_listener_method)
-        
-        # 在类的结束位置前插入所有方法
-        if methods_to_add:
-            all_methods = '\n'.join(methods_to_add)
-            # 找到类的真正结束位置（最后一个大括号）
-            class_end_pos = self._find_class_end_position(code)
-            if class_end_pos != -1:
-                before_end = code[:class_end_pos]
-                after_end = code[class_end_pos:]
-                return before_end + all_methods + after_end
+            if self._has_init_listener_method(code):
+                print("DEBUG: initListener方法已存在，更新其内容")
+                code = self._update_init_listener_method(code, injection_codes['init_listener'])
+            else:
+                print("DEBUG: 创建新的initListener方法")
+                code = self._create_init_listener_method(code, injection_codes['init_listener'])
         
         return code
+    
+    def _has_init_view_method(self, code: str) -> bool:
+        """检查是否已存在initView方法"""
+        return 'protected void initView()' in code or 'public void initView()' in code
+    
+    def _has_init_listener_method(self, code: str) -> bool:
+        """检查是否已存在initListener方法"""
+        return 'public void initListener()' in code or 'protected void initListener()' in code
+    
+    def _create_init_view_method(self, code: str, init_view_code: str) -> str:
+        """创建initView方法"""
+        method_code = f"""
+    @Override
+    protected void initView() {{
+{init_view_code}
+    }}"""
+        
+        # 在类的结束位置前插入方法
+        class_end_pos = self._find_class_end_position(code)
+        if class_end_pos != -1:
+            before_end = code[:class_end_pos]
+            after_end = code[class_end_pos:]
+            return before_end + method_code + after_end
+        
+        return code
+    
+    def _create_init_listener_method(self, code: str, init_listener_code: str) -> str:
+        """创建initListener方法"""
+        method_code = f"""
+    @Override
+    public void initListener() {{
+{init_listener_code}
+    }}"""
+        
+        # 在类的结束位置前插入方法
+        class_end_pos = self._find_class_end_position(code)
+        if class_end_pos != -1:
+            before_end = code[:class_end_pos]
+            after_end = code[class_end_pos:]
+            return before_end + method_code + after_end
+        
+        return code
+    
+    def _update_init_view_method(self, code: str, init_view_code: str) -> str:
+        """更新现有的initView方法"""
+        # 查找initView方法并替换其内容
+        pattern = re.compile(
+            r'(@Override\s*\n\s*(?:public|protected)\s+void\s+initView\s*\(\s*\)\s*\{)([^}]*)(\})',
+            re.MULTILINE | re.DOTALL
+        )
+        
+        def replace_method(match):
+            method_start = match.group(1)
+            method_end = match.group(3)
+            return method_start + '\n' + init_view_code + '\n    ' + method_end
+        
+        return pattern.sub(replace_method, code)
+    
+    def _update_init_listener_method(self, code: str, init_listener_code: str) -> str:
+        """更新现有的initListener方法"""
+        # 查找initListener方法并替换其内容
+        pattern = re.compile(
+            r'(@Override\s*\n\s*(?:public|protected)\s+void\s+initListener\s*\(\s*\)\s*\{)([^}]*)(\})',
+            re.MULTILINE | re.DOTALL
+        )
+        
+        def replace_method(match):
+            method_start = match.group(1)
+            method_end = match.group(3)
+            return method_start + '\n' + init_listener_code + '\n    ' + method_end
+        
+        return pattern.sub(replace_method, code)
     
     def _find_class_end_position(self, code: str) -> int:
         """找到类的真正结束位置（最后一个大括号）"""
