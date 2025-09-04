@@ -132,12 +132,15 @@ class CodeInjector:
         if bind_views:
             init_view_lines.append("        // 初始化View绑定 - 替换@BindView注解")
             
-            # 只处理@BindView注解的View
+            # 只处理主类中的@BindView注解，过滤掉内部类中的注解
             for bind_view in bind_views:
                 field_name = bind_view['name']
                 resource_id = bind_view['id']
-                line = f"        {field_name} = findViewById({resource_id});"
-                init_view_lines.append(line)
+                
+                # 检查这个字段是否属于主类
+                if self._is_main_class_field(field_name, bind_views):
+                    line = f"        {field_name} = findViewById({resource_id});"
+                    init_view_lines.append(line)
         
         # 生成initListener方法代码
         init_listener_lines = []
@@ -221,6 +224,27 @@ class CodeInjector:
                 return True
         
         return False
+    
+    def _is_main_class_field(self, field_name: str, bind_views: List[Dict]) -> bool:
+        """检查字段是否属于主类（简单启发式方法）"""
+        # 如果字段名以m开头且不是典型的Holder字段名，则认为是主类字段
+        if field_name.startswith('m') and not field_name.startswith('mImg') and not field_name.startswith('mColor'):
+            return True
+        
+        # 如果字段名是典型的Activity/Fragment字段名，则认为是主类字段
+        main_class_indicators = ['mColorList', 'mPreview', 'mRad', 'mFrm', 'mBtn', 'mTv', 'mEt', 'mIv']
+        for indicator in main_class_indicators:
+            if field_name.startswith(indicator):
+                return True
+        
+        # 如果字段名是典型的Holder字段名，则认为是内部类字段
+        holder_indicators = ['mImgSelected', 'mColorPannelView']
+        for indicator in holder_indicators:
+            if field_name == indicator:
+                return False
+        
+        # 默认认为是主类字段
+        return True
     
     def _generate_holder_injection_code(self, parsed_data: Dict[str, Any]) -> str:
         """为Holder类生成初始化代码"""
@@ -398,6 +422,120 @@ class CodeInjector:
             else:
                 print("DEBUG: 创建新的initListener方法")
                 code = self._create_init_listener_method(code, injection_codes['init_listener'])
+        
+        # 处理内部类中的@BindView注解
+        code = self._inject_inner_classes(code, parsed_data)
+        
+        return code
+    
+    def _inject_inner_classes(self, code: str, parsed_data: Dict[str, Any]) -> str:
+        """处理内部类中的@BindView注解"""
+        bind_views = parsed_data.get('bind_views', [])
+        
+        # 查找所有内部类
+        inner_classes = self._find_inner_classes(code)
+        
+        for inner_class in inner_classes:
+            class_name = inner_class['name']
+            class_start = inner_class['start']
+            class_end = inner_class['end']
+            
+            # 检查是否是Holder类
+            if 'Holder' in class_name and 'BaseHolder' in inner_class.get('extends', ''):
+                # 为Holder类生成初始化代码
+                holder_bind_views = [bv for bv in bind_views if not self._is_main_class_field(bv['name'], bind_views)]
+                
+                if holder_bind_views:
+                    holder_code = self._generate_holder_injection_code({'bind_views': holder_bind_views, 'on_clicks': []})
+                    
+                    # 在Holder类的构造器中注入代码
+                    code = self._inject_in_holder_constructor(code, class_start, class_end, holder_code)
+        
+        return code
+    
+    def _find_inner_classes(self, code: str) -> List[Dict]:
+        """查找所有内部类"""
+        inner_classes = []
+        
+        # 查找所有class声明
+        class_pattern = re.compile(r'class\s+(\w+)(?:\s+extends\s+(\w+))?', re.MULTILINE)
+        matches = class_pattern.finditer(code)
+        
+        for match in matches:
+            class_name = match.group(1)
+            extends = match.group(2) if match.group(2) else ''
+            
+            # 跳过最外层的类（查找第一个class声明）
+            first_class_match = re.search(r'public\s+class\s+\w+', code)
+            if first_class_match and match.start() <= first_class_match.end():
+                continue
+            
+            # 查找类的结束位置
+            brace_count = 0
+            class_end = match.end()
+            in_class = False
+            
+            for i, char in enumerate(code[match.end():], match.end()):
+                if char == '{':
+                    brace_count += 1
+                    in_class = True
+                elif char == '}':
+                    brace_count -= 1
+                    if brace_count == 0 and in_class:
+                        class_end = i + 1
+                        break
+            
+            inner_classes.append({
+                'name': class_name,
+                'extends': extends,
+                'start': match.start(),
+                'end': class_end
+            })
+        
+        return inner_classes
+    
+    def _inject_in_holder_constructor(self, code: str, class_start: int, class_end: int, holder_code: str) -> str:
+        """在Holder类的构造器中注入代码"""
+        class_content = code[class_start:class_end]
+        
+        # 查找构造器
+        constructor_pattern = re.compile(r'public\s+\w+\s*\([^)]*View\s+\w+[^)]*\)\s*\{', re.MULTILINE)
+        constructor_match = constructor_pattern.search(class_content)
+        
+        if constructor_match:
+            constructor_start = class_start + constructor_match.end()
+            
+            # 查找构造器的结束位置
+            brace_count = 1
+            constructor_end = constructor_start
+            
+            for i, char in enumerate(code[constructor_start:], constructor_start):
+                if char == '{':
+                    brace_count += 1
+                elif char == '}':
+                    brace_count -= 1
+                    if brace_count == 0:
+                        constructor_end = i
+                        break
+            
+            # 在构造器内部注入代码
+            before_constructor = code[:constructor_start]
+            after_constructor = code[constructor_end:]
+            
+            # 查找super调用
+            constructor_content = code[constructor_start:constructor_end]
+            super_call_pattern = re.compile(r'super\s*\([^)]*\)\s*;')
+            super_match = super_call_pattern.search(constructor_content)
+            
+            if super_match:
+                super_end = constructor_start + super_match.end()
+                return (before_constructor + 
+                       constructor_content[:super_match.end()] + 
+                       '\n' + holder_code + 
+                       constructor_content[super_match.end():] + 
+                       after_constructor)
+            else:
+                return before_constructor + '\n' + holder_code + constructor_content + after_constructor
         
         return code
     
