@@ -249,26 +249,47 @@ class CodeInjector:
     
     def _update_init_listener_method(self, code: str, init_listener_code: str) -> str:
         """更新现有的initListener方法"""
-        # 查找initListener方法并追加新的监听器代码
-        pattern = re.compile(
-            r'(@Override\s*\n\s*(?:public|protected)\s+void\s+initListener\s*\(\s*\)\s*\{)([^}]*)(\})',
-            re.MULTILINE | re.DOTALL
-        )
+        # 使用更精确的方法来找到initListener方法的结束位置
+        lines = code.split('\n')
+        method_start_line = -1
+        method_end_line = -1
         
-        def replace_method(match):
-            method_start = match.group(1)
-            original_content = match.group(2)
-            method_end = match.group(3)
-            
-            # 保留原有内容，并在末尾追加新的监听器代码
-            if original_content.strip():
-                # 如果原有内容不为空，在末尾追加
-                return method_start + original_content + '\n        \n        // 新增的点击事件监听器\n' + init_listener_code + '\n    ' + method_end
-            else:
-                # 如果原有内容为空，直接添加新内容
-                return method_start + '\n' + init_listener_code + '\n    ' + method_end
+        # 找到initListener方法的开始行
+        for i, line in enumerate(lines):
+            if 'public void initListener() {' in line or 'protected void initListener() {' in line:
+                method_start_line = i
+                break
         
-        return pattern.sub(replace_method, code)
+        if method_start_line == -1:
+            return code
+        
+        # 找到initListener方法的结束行（正确处理嵌套大括号）
+        brace_count = 0
+        for i in range(method_start_line, len(lines)):
+            line = lines[i]
+            brace_count += line.count('{') - line.count('}')
+            if brace_count == 0 and i > method_start_line:
+                method_end_line = i
+                break
+        
+        if method_end_line == -1:
+            return code
+        
+        # 提取原有方法内容
+        original_lines = lines[method_start_line + 1:method_end_line]
+        original_content = '\n'.join(original_lines)
+        
+        # 构建新的方法内容
+        if original_content.strip():
+            # 如果原有内容不为空，在末尾追加
+            new_content = original_content + '\n        \n        // 新增的点击事件监听器\n' + init_listener_code
+        else:
+            # 如果原有内容为空，直接添加新内容
+            new_content = '\n' + init_listener_code
+        
+        # 替换方法内容
+        new_lines = lines[:method_start_line + 1] + [new_content] + lines[method_end_line:]
+        return '\n'.join(new_lines)
     
     def _find_class_end_position(self, code: str) -> int:
         """找到类的真正结束位置（最后一个大括号）"""
