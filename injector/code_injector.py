@@ -40,6 +40,11 @@ class CodeInjector:
         if not parsed_data.get('has_butterknife', False):
             return code
         
+        # 检查是否是Holder类
+        if self._is_holder_class(code):
+            print("DEBUG: 检测到Holder类，使用Holder特殊处理")
+            return self._inject_for_holder_class(code, parsed_data)
+        
         # 检查是否继承自NewBaseActivity或NewBaseFragment
         if self._is_newbase_activity(code):
             print("DEBUG: 检测到继承自NewBaseActivity或NewBaseFragment，使用定制化处理")
@@ -198,6 +203,119 @@ class CodeInjector:
         
         # 如果没有直接继承，递归检查继承链
         return self._check_inheritance_chain(code)
+    
+    def _is_holder_class(self, code: str) -> bool:
+        """检查是否是Holder类（继承自BaseHolder）"""
+        # 检查直接继承BaseHolder
+        if re.search(r'extends\s+.*BaseHolder', code, re.MULTILINE):
+            return True
+        
+        # 检查类名是否包含Holder
+        class_name_match = re.search(r'class\s+(\w+)', code)
+        if class_name_match:
+            class_name = class_name_match.group(1)
+            if 'Holder' in class_name:
+                return True
+        
+        return False
+    
+    def _generate_holder_injection_code(self, parsed_data: Dict[str, Any]) -> str:
+        """为Holder类生成初始化代码"""
+        bind_views = parsed_data.get('bind_views', [])
+        on_clicks = parsed_data.get('on_clicks', [])
+        
+        lines = []
+        
+        # 生成@BindView的初始化代码
+        if bind_views:
+            lines.append("        // 初始化View绑定 - 替换@BindView注解")
+            for bind_view in bind_views:
+                field_name = bind_view['name']
+                resource_id = bind_view['id']
+                lines.append(f"        {field_name} = itemView.findViewById({resource_id});")
+            lines.append("")
+        
+        # 生成@OnClick的监听器代码
+        if on_clicks:
+            lines.append("        // 初始化点击事件 - 替换@OnClick注解")
+            for on_click in on_clicks:
+                method_name = on_click['method']
+                resource_ids = on_click['ids']
+                has_view_param = on_click.get('has_view_param', True)
+                param_type = on_click.get('param_type', 'View')
+                
+                for resource_id in resource_ids:
+                    # 查找对应的View变量名
+                    view_name = self._find_view_name_for_resource_id(resource_id, bind_views)
+                    
+                    if view_name:
+                        if has_view_param:
+                            if param_type == 'View':
+                                lines.append(f"        {view_name}.setOnClickListener(v -> {method_name}(v));")
+                            else:
+                                lines.append(f"        {view_name}.setOnClickListener(v -> {method_name}(({param_type}) v));")
+                        else:
+                            lines.append(f"        {view_name}.setOnClickListener(v -> {method_name}());")
+                        lines.append("")
+        
+        return '\n'.join(lines)
+    
+    def _inject_for_holder_class(self, code: str, parsed_data: Dict[str, Any]) -> str:
+        """为Holder类注入初始化代码"""
+        # 生成Holder类的初始化代码
+        holder_code = self._generate_holder_injection_code(parsed_data)
+        
+        if not holder_code:
+            return code
+        
+        # 查找构造器方法
+        constructor_pattern = re.compile(
+            r'public\s+\w+\s*\([^)]*View\s+\w+[^)]*\)\s*\{',
+            re.MULTILINE
+        )
+        
+        match = constructor_pattern.search(code)
+        if match:
+            # 找到构造器，在构造器内部注入代码
+            constructor_start = match.end()
+            
+            # 查找构造器的结束位置
+            brace_count = 1
+            constructor_end = constructor_start
+            
+            for i, char in enumerate(code[constructor_start:], constructor_start):
+                if char == '{':
+                    brace_count += 1
+                elif char == '}':
+                    brace_count -= 1
+                    if brace_count == 0:
+                        constructor_end = i
+                        break
+            
+            # 在构造器内部注入代码
+            before_constructor = code[:constructor_start]
+            after_constructor = code[constructor_end:]
+            
+            # 检查构造器内部是否已经有初始化代码
+            constructor_content = code[constructor_start:constructor_end]
+            
+            # 查找super调用
+            super_call_pattern = re.compile(r'super\s*\([^)]*\)\s*;')
+            super_match = super_call_pattern.search(constructor_content)
+            
+            if super_match:
+                # 如果有super调用，在super调用后添加初始化代码
+                super_end = super_match.end()
+                return (before_constructor + 
+                       constructor_content[:super_end] + 
+                       '\n' + holder_code + 
+                       constructor_content[super_end:] + 
+                       after_constructor)
+            else:
+                # 如果没有super调用，直接在构造器开始后添加
+                return before_constructor + '\n' + holder_code + constructor_content + after_constructor
+        
+        return code
     
     def _check_inheritance_chain(self, code: str) -> bool:
         """递归检查继承链中是否包含NewBaseActivity或NewBaseFragment"""
