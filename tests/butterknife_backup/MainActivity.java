@@ -5,9 +5,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
+
 import butterknife.BindView;
-import butterknife.ButterKnife;
 import butterknife.OnClick;
+import butterknife.ButterKnife;
 
 public class MainActivity extends AppCompatActivity {
     
@@ -25,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         
+        // 绑定ButterKnife
         ButterKnife.bind(this);
         
         // 其他初始化代码
