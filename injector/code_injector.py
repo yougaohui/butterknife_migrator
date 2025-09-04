@@ -269,6 +269,7 @@ class CodeInjector:
         method_code = f"""
     @Override
     protected void initViews() {{
+        super.initViews();
 {init_view_code}
     }}"""
         
@@ -300,18 +301,53 @@ class CodeInjector:
     
     def _update_init_view_method(self, code: str, init_view_code: str) -> str:
         """更新现有的initViews方法"""
-        # 查找initViews方法并替换其内容
-        pattern = re.compile(
-            r'(@Override\s*\n\s*(?:public|protected)\s+void\s+initViews\s*\(\s*\)\s*\{)([^}]*)(\})',
-            re.MULTILINE | re.DOTALL
-        )
+        # 使用更精确的方法来找到initViews方法的结束位置
+        lines = code.split('\n')
+        method_start_line = -1
+        method_end_line = -1
         
-        def replace_method(match):
-            method_start = match.group(1)
-            method_end = match.group(3)
-            return method_start + '\n' + init_view_code + '\n    ' + method_end
+        # 找到initViews方法的开始行
+        for i, line in enumerate(lines):
+            if 'protected void initViews() {' in line or 'public void initViews() {' in line:
+                method_start_line = i
+                break
         
-        return pattern.sub(replace_method, code)
+        if method_start_line == -1:
+            return code
+        
+        # 找到initViews方法的结束行（正确处理嵌套大括号）
+        brace_count = 0
+        for i in range(method_start_line, len(lines)):
+            line = lines[i]
+            brace_count += line.count('{') - line.count('}')
+            if brace_count == 0 and i > method_start_line:
+                method_end_line = i
+                break
+        
+        if method_end_line == -1:
+            return code
+        
+        # 提取原有方法内容
+        original_lines = lines[method_start_line + 1:method_end_line]
+        original_content = '\n'.join(original_lines)
+        
+        # 检查是否已经有super.initViews()调用
+        has_super_call = 'super.initViews()' in original_content
+        
+        # 构建新的方法内容
+        if original_content.strip():
+            # 如果原有内容不为空，在末尾追加
+            if has_super_call:
+                new_content = original_content + '\n' + init_view_code
+            else:
+                new_content = original_content + '\n        super.initViews();\n' + init_view_code
+        else:
+            # 如果原有内容为空，直接添加新内容
+            new_content = '\n        super.initViews();\n' + init_view_code
+        
+        # 替换方法内容
+        new_lines = lines[:method_start_line + 1] + [new_content] + lines[method_end_line:]
+        return '\n'.join(new_lines)
     
     def _update_init_listener_method(self, code: str, init_listener_code: str) -> str:
         """更新现有的initListener方法"""
