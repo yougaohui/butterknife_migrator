@@ -21,7 +21,7 @@ class ButterKnifeParser:
         )
         
         self.on_click_pattern = re.compile(
-            r'@OnClick\s*\(\s*(?:\{\s*)?((?:R\.id\.\w+(?:\s*,\s*R\.id\.\w+)*)?)(?:\s*\})?\s*\)\s*(?:public\s+)?(?:void\s+)?(\w+)\s*\(',
+            r'@OnClick\s*\(\s*(?:\{\s*)?((?:R\.id\.\w+(?:\s*,\s*R\.id\.\w+)*)?)(?:\s*\})?\s*\)\s*(?:public\s+)?(?:void\s+)?(\w+)\s*\([^)]*\)',
             re.MULTILINE
         )
         
@@ -139,13 +139,33 @@ class ButterKnifeParser:
             else:
                 resource_ids = []
             
+            # 检测方法是否有View参数
+            has_view_param = self._check_method_has_view_param(content, method_name.strip())
+            
             on_clicks.append({
                 'ids': resource_ids,
                 'method': method_name.strip(),
+                'has_view_param': has_view_param,
                 'original_line': self._find_original_line(content, match[0])
             })
         
         return on_clicks
+    
+    def _check_method_has_view_param(self, content: str, method_name: str) -> bool:
+        """检查方法是否有View参数"""
+        # 查找方法定义
+        method_pattern = re.compile(
+            rf'(?:public\s+|private\s+|protected\s+)?(?:static\s+)?(?:void\s+)?{re.escape(method_name)}\s*\(([^)]*)\)',
+            re.MULTILINE
+        )
+        
+        match = method_pattern.search(content)
+        if match:
+            params = match.group(1).strip()
+            # 检查参数中是否包含View
+            return 'View' in params
+        
+        return False
     
     def _has_bind_call(self, content: str) -> bool:
         """检查是否包含ButterKnife.bind调用"""

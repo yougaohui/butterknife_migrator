@@ -88,11 +88,21 @@ class CodeInjector:
                     view_name = self._find_view_name_for_resource_id(resource_id, bind_views)
                     
                     if view_name:
+                        # 检查方法是否有View参数
+                        has_view_param = on_click.get('has_view_param', True)  # 默认为True保持向后兼容
+                        
                         # 生成setOnClickListener调用，调用保留的完整方法
                         lines.append(f"        {view_name}.setOnClickListener(new View.OnClickListener() {{")
                         lines.append(f"            @Override")
                         lines.append(f"            public void onClick(View v) {{")
-                        lines.append(f"                {method_name}(v);")
+                        
+                        if has_view_param:
+                            # 如果方法有View参数，传入v
+                            lines.append(f"                {method_name}(v);")
+                        else:
+                            # 如果方法没有View参数，不传入v
+                            lines.append(f"                {method_name}();")
+                        
                         lines.append(f"            }}")
                         lines.append(f"        }});")
                         lines.append("")
@@ -129,11 +139,21 @@ class CodeInjector:
                     view_name = self._find_view_name_for_resource_id(resource_id, bind_views)
                     
                     if view_name:
+                        # 检查方法是否有View参数
+                        has_view_param = on_click.get('has_view_param', True)  # 默认为True保持向后兼容
+                        
                         # 生成setOnClickListener调用，调用保留的完整方法
                         init_listener_lines.append(f"        {view_name}.setOnClickListener(new View.OnClickListener() {{")
                         init_listener_lines.append(f"            @Override")
                         init_listener_lines.append(f"            public void onClick(View v) {{")
-                        init_listener_lines.append(f"                {method_name}(v);")
+                        
+                        if has_view_param:
+                            # 如果方法有View参数，传入v
+                            init_listener_lines.append(f"                {method_name}(v);")
+                        else:
+                            # 如果方法没有View参数，不传入v
+                            init_listener_lines.append(f"                {method_name}();")
+                        
                         init_listener_lines.append(f"            }}")
                         init_listener_lines.append(f"        }});")
                         init_listener_lines.append("")
