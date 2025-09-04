@@ -184,14 +184,31 @@ class CodeInjector:
         # 在类的结束位置前插入所有方法
         if methods_to_add:
             all_methods = '\n'.join(methods_to_add)
-            match = self.class_end_pattern.search(code)
-            if match:
-                before_end = code[:match.start()]
-                after_end = code[match.start():]
+            # 找到类的真正结束位置（最后一个大括号）
+            class_end_pos = self._find_class_end_position(code)
+            if class_end_pos != -1:
+                before_end = code[:class_end_pos]
+                after_end = code[class_end_pos:]
                 return before_end + all_methods + after_end
         
         return code
     
+    def _find_class_end_position(self, code: str) -> int:
+        """找到类的真正结束位置（最后一个大括号）"""
+        # 使用更简单的方法：找到最后一个独立的 '}'
+        lines = code.split('\n')
+        
+        # 从后往前查找最后一个大括号
+        for i in range(len(lines) - 1, -1, -1):
+            line = lines[i].strip()
+            if line == '}':
+                # 找到最后一个大括号，计算其在原代码中的位置
+                pos = 0
+                for j in range(i):
+                    pos += len(lines[j]) + 1  # +1 for newline
+                return pos
+        
+        return -1
     
     def _find_view_name_for_resource_id(self, resource_id: str, bind_views: List[Dict[str, Any]]) -> Optional[str]:
         """根据资源ID查找对应的View变量名"""
