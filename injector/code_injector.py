@@ -298,26 +298,42 @@ class CodeInjector:
         print(f"DEBUG: onCreate方法内容: {repr(match.group(0))}")
         
         method_start = match.end()
-        method_end = self._find_oncreate_method_end(code, method_start)
         
-        print(f"DEBUG: 方法开始位置: {method_start}, 方法结束位置: {method_end}")
+        # 查找setContentView之后的位置，在那里注入代码
+        setcontentview_pattern = re.compile(r'setContentView\s*\([^)]*\)\s*;', re.MULTILINE)
+        setcontentview_match = setcontentview_pattern.search(code, method_start)
         
-        if method_end > method_start:
-            before_end = code[:method_end]
-            after_end = code[method_end:]
+        if setcontentview_match:
+            # 在setContentView之后注入代码
+            injection_position = setcontentview_match.end()
+            print(f"DEBUG: 在setContentView之后注入代码，位置: {injection_position}")
             
-            print(f"DEBUG: 方法体内容长度: {len(code[method_start:method_end])}")
-            print(f"DEBUG: 方法体内容: {repr(code[method_start:method_end][:100])}...")
+            before_injection = code[:injection_position]
+            after_injection = code[injection_position:]
             
-            if not self._has_injection_code(before_end, injection_code):
-                print(f"DEBUG: 注入代码到onCreate方法")
-                result = before_end + '\n' + injection_code + '\n    ' + after_end
+            if not self._has_injection_code(before_injection, injection_code):
+                print(f"DEBUG: 注入代码到setContentView之后")
+                result = before_injection + '\n' + injection_code + '\n' + after_injection
                 print(f"DEBUG: 注入后的代码长度: {len(result)}")
                 return result
             else:
                 print(f"DEBUG: 代码已经存在，跳过注入")
         else:
-            print(f"DEBUG: 方法体结束位置无效")
+            # 如果没有找到setContentView，在onCreate方法末尾注入
+            method_end = self._find_oncreate_method_end(code, method_start)
+            print(f"DEBUG: 没有找到setContentView，在onCreate方法末尾注入，位置: {method_end}")
+            
+            if method_end > method_start:
+                before_end = code[:method_end]
+                after_end = code[method_end:]
+                
+                if not self._has_injection_code(before_end, injection_code):
+                    print(f"DEBUG: 注入代码到onCreate方法末尾")
+                    result = before_end + '\n' + injection_code + '\n    ' + after_end
+                    print(f"DEBUG: 注入后的代码长度: {len(result)}")
+                    return result
+                else:
+                    print(f"DEBUG: 代码已经存在，跳过注入")
         
         return code
     

@@ -21,7 +21,7 @@ class ButterKnifeParser:
         )
         
         self.on_click_pattern = re.compile(
-            r'@OnClick\s*\(\s*\{\s*((?:R\.id\.\w+(?:\s*,\s*R\.id\.\w+)*)?)\s*\}\s*\)\s*public\s+void\s+(\w+)\s*\(',
+            r'@OnClick\s*\(\s*(?:\{\s*)?((?:R\.id\.\w+(?:\s*,\s*R\.id\.\w+)*)?)(?:\s*\})?\s*\)\s*(?:public\s+)?(?:void\s+)?(\w+)\s*\(',
             re.MULTILINE
         )
         
