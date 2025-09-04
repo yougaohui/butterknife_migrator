@@ -40,15 +40,15 @@ class CodeInjector:
         if not parsed_data.get('has_butterknife', False):
             return code
         
+        # 检查是否继承自NewBaseActivity或NewBaseFragment（优先级更高）
+        if self._is_newbase_activity(code):
+            print("DEBUG: 检测到继承自NewBaseActivity或NewBaseFragment，使用定制化处理")
+            return self._inject_for_newbase_activity(code, parsed_data)
+        
         # 检查是否是Holder类
         if self._is_holder_class(code):
             print("DEBUG: 检测到Holder类，使用Holder特殊处理")
             return self._inject_for_holder_class(code, parsed_data)
-        
-        # 检查是否继承自NewBaseActivity或NewBaseFragment
-        if self._is_newbase_activity(code):
-            print("DEBUG: 检测到继承自NewBaseActivity或NewBaseFragment，使用定制化处理")
-            return self._inject_for_newbase_activity(code, parsed_data)
         
         # 获取需要注入的代码
         injection_code = self._generate_injection_code(parsed_data)
@@ -201,20 +201,23 @@ class CodeInjector:
             if re.search(pattern, code, re.MULTILINE):
                 return True
         
+        # 检查是否有getLayoutId方法（NewBaseActivity的典型特征）
+        if re.search(r'public\s+int\s+getLayoutId\s*\(', code, re.MULTILINE):
+            return True
+        
         # 如果没有直接继承，递归检查继承链
         return self._check_inheritance_chain(code)
     
     def _is_holder_class(self, code: str) -> bool:
         """检查是否是Holder类（继承自BaseHolder）"""
-        # 检查直接继承BaseHolder
+        # 检查是否有任何类继承自BaseHolder
         if re.search(r'extends\s+.*BaseHolder', code, re.MULTILINE):
             return True
         
-        # 检查类名是否包含Holder
-        class_name_match = re.search(r'class\s+(\w+)', code)
-        if class_name_match:
-            class_name = class_name_match.group(1)
-            if 'Holder' in class_name:
+        # 检查是否有任何类名包含Holder（排除Activity和Fragment）
+        class_matches = re.findall(r'class\s+(\w+)', code)
+        for class_name in class_matches:
+            if 'Holder' in class_name and 'Activity' not in class_name and 'Fragment' not in class_name:
                 return True
         
         return False
