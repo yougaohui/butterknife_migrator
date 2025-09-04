@@ -249,7 +249,7 @@ class CodeInjector:
     
     def _update_init_listener_method(self, code: str, init_listener_code: str) -> str:
         """更新现有的initListener方法"""
-        # 查找initListener方法并替换其内容
+        # 查找initListener方法并追加新的监听器代码
         pattern = re.compile(
             r'(@Override\s*\n\s*(?:public|protected)\s+void\s+initListener\s*\(\s*\)\s*\{)([^}]*)(\})',
             re.MULTILINE | re.DOTALL
@@ -257,8 +257,16 @@ class CodeInjector:
         
         def replace_method(match):
             method_start = match.group(1)
+            original_content = match.group(2)
             method_end = match.group(3)
-            return method_start + '\n' + init_listener_code + '\n    ' + method_end
+            
+            # 保留原有内容，并在末尾追加新的监听器代码
+            if original_content.strip():
+                # 如果原有内容不为空，在末尾追加
+                return method_start + original_content + '\n        \n        // 新增的点击事件监听器\n' + init_listener_code + '\n    ' + method_end
+            else:
+                # 如果原有内容为空，直接添加新内容
+                return method_start + '\n' + init_listener_code + '\n    ' + method_end
         
         return pattern.sub(replace_method, code)
     
