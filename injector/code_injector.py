@@ -107,15 +107,26 @@ class CodeInjector:
         bind_views = parsed_data.get('bind_views', [])
         on_clicks = parsed_data.get('on_clicks', [])
         
+        # 收集所有需要findViewById的ID
+        all_resource_ids = set()
+        
+        # 从@BindView注解收集ID
+        for bind_view in bind_views:
+            all_resource_ids.add(bind_view['id'])
+        
+        # 从@OnClick注解收集ID
+        for on_click in on_clicks:
+            all_resource_ids.update(on_click['ids'])
+        
         # 生成initView方法代码
         init_view_lines = []
         if bind_views:
             init_view_lines.append("        // 初始化View绑定 - 替换@BindView注解")
+            
+            # 只处理@BindView注解的View
             for bind_view in bind_views:
                 field_name = bind_view['name']
                 resource_id = bind_view['id']
-                field_type = bind_view['type']
-                
                 line = f"        {field_name} = findViewById({resource_id});"
                 init_view_lines.append(line)
         
@@ -135,13 +146,21 @@ class CodeInjector:
                         # 检查方法是否有View参数
                         has_view_param = on_click.get('has_view_param', True)  # 默认为True保持向后兼容
                         
-                        # 生成setOnClickListener调用，使用Lambda表达式
-                        if has_view_param:
-                            # 如果方法有View参数，传入v
-                            init_listener_lines.append(f"        {view_name}.setOnClickListener(v -> {method_name}(v));")
+                        # 检查这个View是否已经在@BindView中声明
+                        bind_view_ids = {bind_view['id'] for bind_view in bind_views}
+                        
+                        if resource_id in bind_view_ids:
+                            # 如果View已经在@BindView中声明，直接使用成员变量
+                            if has_view_param:
+                                init_listener_lines.append(f"        {view_name}.setOnClickListener(v -> {method_name}(v));")
+                            else:
+                                init_listener_lines.append(f"        {view_name}.setOnClickListener(v -> {method_name}());")
                         else:
-                            # 如果方法没有View参数，不传入v
-                            init_listener_lines.append(f"        {view_name}.setOnClickListener(v -> {method_name}());")
+                            # 如果View没有在@BindView中声明，直接在initListener中获取并设置监听器
+                            if has_view_param:
+                                init_listener_lines.append(f"        findViewById({resource_id}).setOnClickListener(v -> {method_name}(v));")
+                            else:
+                                init_listener_lines.append(f"        findViewById({resource_id}).setOnClickListener(v -> {method_name}());")
                         init_listener_lines.append("")
         
         return {
@@ -310,12 +329,25 @@ class CodeInjector:
     
     def _find_view_name_for_resource_id(self, resource_id: str, bind_views: List[Dict[str, Any]]) -> Optional[str]:
         """根据资源ID查找对应的View变量名"""
+        # 首先从@BindView注解中查找
         for bind_view in bind_views:
             if bind_view['id'] == resource_id:
                 return bind_view['name']
         
-        # 如果没有找到，返回一个默认名称
-        return f"view_{resource_id.split('.')[-1]}"
+        # 如果没找到，生成一个通用的View变量名
+        return self._generate_view_name_from_id(resource_id)
+    
+    def _generate_view_name_from_id(self, resource_id: str) -> str:
+        """根据资源ID生成View变量名"""
+        # 从资源ID中提取名称部分，例如 R.id.submit_button -> submit_button
+        if '.' in resource_id:
+            id_name = resource_id.split('.')[-1]
+            # 转换为驼峰命名法
+            view_name = f"view_{id_name}"
+            return view_name
+        
+        # 如果格式不符合预期，使用默认名称
+        return f"view_{resource_id.replace('.', '_').replace('R_id_', '')}"
     
     def _inject_in_existing_methods(self, code: str, injection_code: str) -> str:
         """在现有方法中注入代码"""
