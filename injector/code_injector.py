@@ -212,6 +212,18 @@ class CodeInjector:
             # 继续递归检查更深层的继承
             return self._check_deeper_inheritance(code, grandparent_class)
         
+        # 如果当前文件中没有找到父类定义，检查一些常见的基类模式
+        # 这些基类通常继承自NewBaseActivity或NewBaseFragment
+        common_base_classes = [
+            'BaseActivity', 'BaseFragment', 'TabBaseFragment', 'TabBaseActivity',
+            'AppBaseActivity', 'AppBaseFragment', 'CommonBaseActivity', 'CommonBaseFragment'
+        ]
+        
+        for base_class in common_base_classes:
+            if parent_class == base_class:
+                # 假设这些基类继承自NewBaseActivity或NewBaseFragment
+                return True
+        
         return False
     
     def _check_deeper_inheritance(self, code: str, class_name: str) -> bool:
