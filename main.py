@@ -11,9 +11,13 @@ import os
 import sys
 from pathlib import Path
 
+# 添加当前目录到Python路径
+current_dir = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, current_dir)
+
 from config import Config
 from scanner.file_scanner import FileScanner
-from parser.butterknife_parser import ButterKnifeParser
+from butterknife_parser_module.butterknife_parser import ButterKnifeParser
 from transformer.findview_transformer import FindViewTransformer
 from transformer.onclick_transformer import OnClickTransformer
 from transformer.bindcall_remover import BindCallRemover

@@ -16,7 +16,7 @@ class CodeInjector:
     def __init__(self):
         # 编译正则表达式
         self.onCreate_pattern = re.compile(
-            r'(\s*@Override\s*\n\s*protected\s+void\s+onCreate\s*\([^)]*\)\s*\{)',
+            r'(\s*@Override\s*\n?\s*protected\s+void\s+onCreate\s*\([^)]*\)\s*\{)',
             re.MULTILINE
         )
         
@@ -46,12 +46,8 @@ class CodeInjector:
         if not injection_code:
             return code
         
-        # 尝试在现有方法中注入
-        code = self._inject_in_existing_methods(code, injection_code)
-        
-        # 如果没有找到合适的方法，创建新的初始化方法
-        if not self._has_injection_code(code, injection_code):
-            code = self._create_initialization_method(code, injection_code)
+        # 只在onCreate方法中注入代码，不创建新方法
+        code = self._inject_in_oncreate_only(code, injection_code)
         
         return code
     
@@ -59,23 +55,25 @@ class CodeInjector:
         """生成需要注入的代码"""
         lines = []
         
-        # 添加findViewById初始化代码
+        # 1. 首先处理@BindView注解，生成findViewById初始化代码
         bind_views = parsed_data.get('bind_views', [])
         if bind_views:
-            lines.append("        // 初始化View绑定")
+            lines.append("        // 初始化View绑定 - 替换@BindView注解")
             for bind_view in bind_views:
                 field_name = bind_view['name']
                 resource_id = bind_view['id']
                 field_type = bind_view['type']
                 
+                # 生成findViewById调用，确保在移除@BindView注解前先赋值
                 line = f"        {field_name} = ({field_type}) findViewById({resource_id});"
                 lines.append(line)
             lines.append("")
         
-        # 添加OnClickListener初始化代码
+        # 2. 处理@OnClick注解，生成setOnClickListener初始化代码
+        # 保留@OnClick注解下的完整方法，只移除注解本身，然后为每个View设置监听器
         on_clicks = parsed_data.get('on_clicks', [])
         if on_clicks:
-            lines.append("        // 初始化点击事件")
+            lines.append("        // 初始化点击事件 - 替换@OnClick注解")
             for on_click in on_clicks:
                 resource_ids = on_click['ids']
                 method_name = on_click['method']
@@ -85,6 +83,7 @@ class CodeInjector:
                     view_name = self._find_view_name_for_resource_id(resource_id, bind_views)
                     
                     if view_name:
+                        # 生成setOnClickListener调用，调用保留的完整方法
                         lines.append(f"        {view_name}.setOnClickListener(new View.OnClickListener() {{")
                         lines.append(f"            @Override")
                         lines.append(f"            public void onClick(View v) {{")
@@ -172,6 +171,7 @@ class CodeInjector:
         string_char = None
         
         for i, char in enumerate(code[start_pos:], start_pos):
+            # 处理字符串字面量
             if char == '"' or char == "'":
                 if not in_string:
                     in_string = True
@@ -184,6 +184,7 @@ class CodeInjector:
             if in_string:
                 continue
             
+            # 处理大括号
             if char == '{':
                 brace_count += 1
             elif char == '}':
@@ -191,7 +192,44 @@ class CodeInjector:
                 if brace_count == 0:
                     return i + 1
         
-        return start_pos
+        # 如果没有找到匹配的结束大括号，返回代码末尾
+        return len(code)
+    
+    def _find_oncreate_method_end(self, code: str, start_pos: int) -> int:
+        """专门查找onCreate方法的结束位置，使用更精确的算法"""
+        brace_count = 0
+        in_string = False
+        string_char = None
+        
+        for i, char in enumerate(code[start_pos:], start_pos):
+            # 处理字符串字面量
+            if char == '"' or char == "'":
+                if not in_string:
+                    in_string = True
+                    string_char = char
+                elif char == string_char:
+                    in_string = False
+                    string_char = None
+                continue
+            
+            if in_string:
+                continue
+            
+            # 处理大括号
+            if char == '{':
+                brace_count += 1
+            elif char == '}':
+                brace_count -= 1
+                if brace_count == 0:
+                    # 找到onCreate方法结束位置
+                    return i + 1
+                elif brace_count < 0:
+                    # 如果大括号计数变为负数，说明已经超出了方法边界
+                    # 这种情况不应该发生，但为了安全起见，返回当前位置
+                    return i
+        
+        # 如果没有找到匹配的结束大括号，返回代码末尾
+        return len(code)
     
     def _is_suitable_method_for_injection(self, method_content: str) -> bool:
         """检查方法是否适合注入初始化代码"""
@@ -245,6 +283,43 @@ class CodeInjector:
                 return False
         
         return True
+    
+    def _inject_in_oncreate_only(self, code: str, injection_code: str) -> str:
+        """只在onCreate方法中注入代码，不创建新方法"""
+        print(f"DEBUG: 尝试在onCreate方法中注入代码")
+        print(f"DEBUG: 注入代码长度: {len(injection_code)}")
+        
+        match = self.onCreate_pattern.search(code)
+        if not match:
+            print(f"DEBUG: 没有找到onCreate方法")
+            return code
+        
+        print(f"DEBUG: 找到onCreate方法，位置: {match.start()}-{match.end()}")
+        print(f"DEBUG: onCreate方法内容: {repr(match.group(0))}")
+        
+        method_start = match.end()
+        method_end = self._find_oncreate_method_end(code, method_start)
+        
+        print(f"DEBUG: 方法开始位置: {method_start}, 方法结束位置: {method_end}")
+        
+        if method_end > method_start:
+            before_end = code[:method_end]
+            after_end = code[method_end:]
+            
+            print(f"DEBUG: 方法体内容长度: {len(code[method_start:method_end])}")
+            print(f"DEBUG: 方法体内容: {repr(code[method_start:method_end][:100])}...")
+            
+            if not self._has_injection_code(before_end, injection_code):
+                print(f"DEBUG: 注入代码到onCreate方法")
+                result = before_end + '\n' + injection_code + '\n    ' + after_end
+                print(f"DEBUG: 注入后的代码长度: {len(result)}")
+                return result
+            else:
+                print(f"DEBUG: 代码已经存在，跳过注入")
+        else:
+            print(f"DEBUG: 方法体结束位置无效")
+        
+        return code
     
     def get_injection_info(self, parsed_data: Dict[str, Any]) -> Dict[str, Any]:
         """获取注入信息"""

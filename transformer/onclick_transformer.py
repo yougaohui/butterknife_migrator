@@ -40,39 +40,31 @@ class OnClickTransformer(BaseTransformer):
         transformed_code = original_code
         on_clicks = parsed_data.get('on_clicks', [])
         
-        # 1. 替换@OnClick注解为setOnClickListener调用
+        # 只替换@OnClick注解为普通方法
         for on_click in on_clicks:
             transformed_code = self._replace_on_click_annotation(
                 transformed_code, on_click
             )
         
-        # 2. 添加setOnClickListener初始化代码
-        transformed_code = self._add_onclick_listener_initialization(
-            transformed_code, on_clicks
-        )
-        
         return transformed_code
     
     def _replace_on_click_annotation(self, code: str, on_click: Dict[str, Any]) -> str:
-        """替换@OnClick注解为setOnClickListener调用"""
+        """替换@OnClick注解为普通方法"""
         resource_ids = on_click['ids']
         method_name = on_click['method']
         
         if not resource_ids:
             return code
         
-        # 查找@OnClick注解的完整方法
-        method_pattern = re.compile(
-            rf'@OnClick\s*\(\s*\{\s*((?:R\.id\.\w+(?:\s*,\s*R\.id\.\w+)*)?)\s*\}\s*\)\s*public\s+void\s+{re.escape(method_name)}\s*\([^)]*\)\s*\{[^}]*\}',
-            re.MULTILINE | re.DOTALL
+        # 使用更简单的正则表达式，匹配所有@OnClick注解
+        # 包括单参数和多参数的情况
+        annotation_pattern = re.compile(
+            r'@OnClick\s*\(\s*(?:\{\s*)?(?:R\.id\.\w+(?:\s*,\s*R\.id\.\w+)*)?(?:\s*\})?\s*\)',
+            re.MULTILINE
         )
         
-        # 替换为空的onClick方法（因为事件处理会通过setOnClickListener实现）
-        replacement = f"""    public void {method_name}(View view) {{
-        // 事件处理逻辑
-    }}"""
-        
-        return method_pattern.sub(replacement, code)
+        # 只移除注解，保留方法定义
+        return annotation_pattern.sub('', code)
     
     def _add_onclick_listener_initialization(self, code: str, on_clicks: List[Dict[str, Any]]) -> str:
         """添加setOnClickListener初始化代码"""
@@ -163,7 +155,7 @@ class OnClickTransformer(BaseTransformer):
                 
                 # 检查是否已经有初始化代码
                 if not self._has_onclick_initialization_code(before_insert, []):
-                    return before_insert + '\n' + initialization_code + '\n    ' + after_insert
+                    return before_insert + '\n        ' + initialization_code + '\n    ' + after_insert
         
         return code
     
@@ -235,7 +227,8 @@ class OnClickTransformer(BaseTransformer):
         for on_click in on_clicks:
             method_name = on_click['method']
             
-            pattern = rf'setOnClickListener.*{re.escape(method_name)}'
+            escaped_method_name = re.escape(method_name)
+            pattern = r'setOnClickListener.*' + escaped_method_name
             if re.search(pattern, code, re.MULTILINE):
                 return True
         

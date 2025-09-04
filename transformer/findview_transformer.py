@@ -40,16 +40,11 @@ class FindViewTransformer(BaseTransformer):
         transformed_code = original_code
         bind_views = parsed_data.get('bind_views', [])
         
-        # 1. 替换@BindView注解为普通字段声明
+        # 只替换@BindView注解为普通字段声明
         for bind_view in bind_views:
             transformed_code = self._replace_bind_view_annotation(
                 transformed_code, bind_view
             )
-        
-        # 2. 添加findViewById初始化代码
-        transformed_code = self._add_findviewbyid_initialization(
-            transformed_code, bind_views
-        )
         
         return transformed_code
     
@@ -60,15 +55,18 @@ class FindViewTransformer(BaseTransformer):
         resource_id = bind_view['id']
         
         # 查找@BindView注解行
-        annotation_pattern = re.compile(
-            rf'@BindView\s*\(\s*{re.escape(resource_id)}\s*\)\s*{re.escape(field_type)}\s+{re.escape(field_name)}\s*;',
+        escaped_resource_id = re.escape(resource_id)
+        escaped_field_type = re.escape(field_type)
+        escaped_field_name = re.escape(field_name)
+        pattern = re.compile(
+            r'@BindView\s*\(\s*' + escaped_resource_id + r'\s*\)\s*' + escaped_field_type + r'\s+' + escaped_field_name + r'\s*;',
             re.MULTILINE
         )
         
         # 替换为普通字段声明
         replacement = f"{field_type} {field_name};"
         
-        return annotation_pattern.sub(replacement, code)
+        return pattern.sub(replacement, code)
     
     def _add_findviewbyid_initialization(self, code: str, bind_views: List[Dict[str, Any]]) -> str:
         """添加findViewById初始化代码"""
@@ -140,7 +138,7 @@ class FindViewTransformer(BaseTransformer):
                 
                 # 检查是否已经有初始化代码
                 if not self._has_initialization_code(before_insert, []):
-                    return before_insert + '\n' + initialization_code + '\n    ' + after_insert
+                    return before_insert + '\n        ' + initialization_code + '\n    ' + after_insert
         
         return code
     
@@ -213,7 +211,9 @@ class FindViewTransformer(BaseTransformer):
             field_name = bind_view['name']
             resource_id = bind_view['id']
             
-            pattern = rf'{re.escape(field_name)}\s*=\s*.*findViewById\s*\(\s*{re.escape(resource_id)}\s*\)'
+            escaped_field_name = re.escape(field_name)
+            escaped_resource_id = re.escape(resource_id)
+            pattern = escaped_field_name + r'\s*=\s*.*findViewById\s*\(\s*' + escaped_resource_id + r'\s*\)'
             if re.search(pattern, code, re.MULTILINE):
                 return True
         

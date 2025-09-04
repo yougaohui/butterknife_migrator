@@ -38,7 +38,8 @@ class Config:
         self.SCAN_DIRECTORIES = [
             "app/src/main/java",
             "src/main/java",
-            "java"
+            "java",
+            "tests"  # 添加tests目录用于测试
         ]
         
         # 排除的目录
@@ -48,6 +49,7 @@ class Config:
             ".idea",
             "bin",
             "gen"
+            # 移除 "butterknife_backup" 以允许扫描tests目录下的文件
         ]
         
         # 排除的文件模式
