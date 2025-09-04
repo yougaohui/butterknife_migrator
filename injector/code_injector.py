@@ -40,6 +40,11 @@ class CodeInjector:
         if not parsed_data.get('has_butterknife', False):
             return code
         
+        # 检查是否继承自NewBaseActivity
+        if self._is_newbase_activity(code):
+            print("DEBUG: 检测到继承自NewBaseActivity，使用定制化处理")
+            return self._inject_for_newbase_activity(code, parsed_data)
+        
         # 获取需要注入的代码
         injection_code = self._generate_injection_code(parsed_data)
         
@@ -93,6 +98,100 @@ class CodeInjector:
                         lines.append("")
         
         return '\n'.join(lines)
+    
+    def _generate_newbase_injection_code(self, parsed_data: Dict[str, Any]) -> Dict[str, str]:
+        """为继承NewBaseActivity的类生成定制化注入代码"""
+        bind_views = parsed_data.get('bind_views', [])
+        on_clicks = parsed_data.get('on_clicks', [])
+        
+        # 生成initView方法代码
+        init_view_lines = []
+        if bind_views:
+            init_view_lines.append("        // 初始化View绑定 - 替换@BindView注解")
+            for bind_view in bind_views:
+                field_name = bind_view['name']
+                resource_id = bind_view['id']
+                field_type = bind_view['type']
+                
+                line = f"        {field_name} = ({field_type}) findViewById({resource_id});"
+                init_view_lines.append(line)
+        
+        # 生成initListener方法代码
+        init_listener_lines = []
+        if on_clicks:
+            init_listener_lines.append("        // 初始化点击事件 - 替换@OnClick注解")
+            for on_click in on_clicks:
+                resource_ids = on_click['ids']
+                method_name = on_click['method']
+                
+                for resource_id in resource_ids:
+                    # 查找对应的View变量名
+                    view_name = self._find_view_name_for_resource_id(resource_id, bind_views)
+                    
+                    if view_name:
+                        # 生成setOnClickListener调用，调用保留的完整方法
+                        init_listener_lines.append(f"        {view_name}.setOnClickListener(new View.OnClickListener() {{")
+                        init_listener_lines.append(f"            @Override")
+                        init_listener_lines.append(f"            public void onClick(View v) {{")
+                        init_listener_lines.append(f"                {method_name}(v);")
+                        init_listener_lines.append(f"            }}")
+                        init_listener_lines.append(f"        }});")
+                        init_listener_lines.append("")
+        
+        return {
+            'init_view': '\n'.join(init_view_lines),
+            'init_listener': '\n'.join(init_listener_lines)
+        }
+    
+    def _is_newbase_activity(self, code: str) -> bool:
+        """检查是否继承自NewBaseActivity"""
+        newbase_patterns = [
+            r'extends\s+NewBaseActivity',
+            r'extends\s+\w*NewBaseActivity',
+            r'implements\s+.*NewBaseActivity'
+        ]
+        
+        for pattern in newbase_patterns:
+            if re.search(pattern, code, re.MULTILINE):
+                return True
+        
+        return False
+    
+    def _inject_for_newbase_activity(self, code: str, parsed_data: Dict[str, Any]) -> str:
+        """为继承NewBaseActivity的类进行定制化注入"""
+        # 生成定制化注入代码
+        injection_codes = self._generate_newbase_injection_code(parsed_data)
+        
+        # 创建initView和initListener方法
+        methods_to_add = []
+        
+        if injection_codes['init_view']:
+            init_view_method = f"""
+    @Override
+    protected void initView() {{
+{injection_codes['init_view']}
+    }}"""
+            methods_to_add.append(init_view_method)
+        
+        if injection_codes['init_listener']:
+            init_listener_method = f"""
+    @Override
+    public void initListener() {{
+{injection_codes['init_listener']}
+    }}"""
+            methods_to_add.append(init_listener_method)
+        
+        # 在类的结束位置前插入所有方法
+        if methods_to_add:
+            all_methods = '\n'.join(methods_to_add)
+            match = self.class_end_pattern.search(code)
+            if match:
+                before_end = code[:match.start()]
+                after_end = code[match.start():]
+                return before_end + all_methods + after_end
+        
+        return code
+    
     
     def _find_view_name_for_resource_id(self, resource_id: str, bind_views: List[Dict[str, Any]]) -> Optional[str]:
         """根据资源ID查找对应的View变量名"""
