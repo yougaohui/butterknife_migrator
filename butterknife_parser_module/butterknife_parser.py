@@ -140,19 +140,20 @@ class ButterKnifeParser:
                 resource_ids = []
             
             # 检测方法是否有View参数
-            has_view_param = self._check_method_has_view_param(content, method_name.strip())
+            has_view_param, param_type = self._check_method_has_view_param(content, method_name.strip())
             
             on_clicks.append({
                 'ids': resource_ids,
                 'method': method_name.strip(),
                 'has_view_param': has_view_param,
+                'param_type': param_type,
                 'original_line': self._find_original_line(content, match[0])
             })
         
         return on_clicks
     
-    def _check_method_has_view_param(self, content: str, method_name: str) -> bool:
-        """检查方法是否有View参数"""
+    def _check_method_has_view_param(self, content: str, method_name: str) -> Tuple[bool, str]:
+        """检查方法是否有View参数，并返回参数类型"""
         # 查找方法定义
         method_pattern = re.compile(
             rf'(?:public\s+|private\s+|protected\s+)?(?:static\s+)?(?:void\s+)?{re.escape(method_name)}\s*\(([^)]*)\)',
@@ -162,10 +163,37 @@ class ButterKnifeParser:
         match = method_pattern.search(content)
         if match:
             params = match.group(1).strip()
-            # 检查参数中是否包含View
-            return 'View' in params
+            if params:
+                # 检查参数中是否包含View类型（包括所有View子类）
+                param_type = self._extract_view_param_type(params)
+                if param_type != 'View' or 'View' in params:
+                    return True, param_type
+                else:
+                    return False, ""
+            else:
+                return False, ""
         
-        return False
+        return False, ""
+    
+    def _extract_view_param_type(self, params: str) -> str:
+        """从参数中提取View类型"""
+        # 常见的View类型
+        view_types = [
+            'TextView', 'Button', 'ImageView', 'EditText', 'CheckBox', 'RadioButton',
+            'Switch', 'SeekBar', 'ProgressBar', 'Spinner', 'ListView', 'RecyclerView',
+            'LinearLayout', 'RelativeLayout', 'FrameLayout', 'ConstraintLayout',
+            'CardView', 'ScrollView', 'NestedScrollView', 'ViewPager', 'TabLayout',
+            'Toolbar', 'AppBarLayout', 'CoordinatorLayout', 'DrawerLayout',
+            'NavigationView', 'BottomNavigationView', 'FloatingActionButton'
+        ]
+        
+        # 查找参数中的View类型
+        for view_type in view_types:
+            if view_type in params:
+                return view_type
+        
+        # 如果没有找到具体的View类型，返回通用的View
+        return 'View'
     
     def _has_bind_call(self, content: str) -> bool:
         """检查是否包含ButterKnife.bind调用"""

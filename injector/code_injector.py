@@ -93,8 +93,12 @@ class CodeInjector:
                         
                         # 生成setOnClickListener调用，使用Lambda表达式
                         if has_view_param:
-                            # 如果方法有View参数，传入v
-                            lines.append(f"        {view_name}.setOnClickListener(v -> {method_name}(v));")
+                            # 如果方法有View参数，传入v（可能需要强转）
+                            param_type = on_click.get('param_type', 'View')
+                            if param_type == 'View':
+                                lines.append(f"        {view_name}.setOnClickListener(v -> {method_name}(v));")
+                            else:
+                                lines.append(f"        {view_name}.setOnClickListener(v -> {method_name}(({param_type}) v));")
                         else:
                             # 如果方法没有View参数，不传入v
                             lines.append(f"        {view_name}.setOnClickListener(v -> {method_name}());")
@@ -152,13 +156,21 @@ class CodeInjector:
                         if resource_id in bind_view_ids:
                             # 如果View已经在@BindView中声明，直接使用成员变量
                             if has_view_param:
-                                init_listener_lines.append(f"        {view_name}.setOnClickListener(v -> {method_name}(v));")
+                                param_type = on_click.get('param_type', 'View')
+                                if param_type == 'View':
+                                    init_listener_lines.append(f"        {view_name}.setOnClickListener(v -> {method_name}(v));")
+                                else:
+                                    init_listener_lines.append(f"        {view_name}.setOnClickListener(v -> {method_name}(({param_type}) v));")
                             else:
                                 init_listener_lines.append(f"        {view_name}.setOnClickListener(v -> {method_name}());")
                         else:
                             # 如果View没有在@BindView中声明，直接在initListener中获取并设置监听器
                             if has_view_param:
-                                init_listener_lines.append(f"        findViewById({resource_id}).setOnClickListener(v -> {method_name}(v));")
+                                param_type = on_click.get('param_type', 'View')
+                                if param_type == 'View':
+                                    init_listener_lines.append(f"        findViewById({resource_id}).setOnClickListener(v -> {method_name}(v));")
+                                else:
+                                    init_listener_lines.append(f"        findViewById({resource_id}).setOnClickListener(v -> {method_name}(({param_type}) v));")
                             else:
                                 init_listener_lines.append(f"        findViewById({resource_id}).setOnClickListener(v -> {method_name}());")
                         init_listener_lines.append("")
