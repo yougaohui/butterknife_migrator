@@ -19,8 +19,8 @@ class FindViewTransformer(BaseTransformer):
         
         # 编译正则表达式
         self.bind_view_pattern = re.compile(
-            r'@BindView\s*\(\s*(R\.id\.\w+)\s*\)\s*(\w+)\s+(\w+)\s*;',
-            re.MULTILINE
+            r'@BindView\s*\(\s*(R\.id\.\w+)\s*\)\s*\n\s*(?:public\s+|private\s+|protected\s+)?(\w+)\s+(\w+)\s*;',
+            re.MULTILINE | re.DOTALL
         )
         
         self.field_declaration_pattern = re.compile(
@@ -54,13 +54,13 @@ class FindViewTransformer(BaseTransformer):
         field_name = bind_view['name']
         resource_id = bind_view['id']
         
-        # 查找@BindView注解行
+        # 查找@BindView注解行（支持多行格式和修饰符）
         escaped_resource_id = re.escape(resource_id)
         escaped_field_type = re.escape(field_type)
         escaped_field_name = re.escape(field_name)
         pattern = re.compile(
-            r'@BindView\s*\(\s*' + escaped_resource_id + r'\s*\)\s*' + escaped_field_type + r'\s+' + escaped_field_name + r'\s*;',
-            re.MULTILINE
+            r'@BindView\s*\(\s*' + escaped_resource_id + r'\s*\)\s*\n\s*(?:public\s+|private\s+|protected\s+)?' + escaped_field_type + r'\s+' + escaped_field_name + r'\s*;',
+            re.MULTILINE | re.DOTALL
         )
         
         # 替换为普通字段声明
