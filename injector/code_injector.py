@@ -188,18 +188,18 @@ class CodeInjector:
         return code
     
     def _has_init_view_method(self, code: str) -> bool:
-        """检查是否已存在initView方法"""
-        return 'protected void initView()' in code or 'public void initView()' in code
+        """检查是否已存在initViews方法"""
+        return 'protected void initViews()' in code or 'public void initViews()' in code
     
     def _has_init_listener_method(self, code: str) -> bool:
         """检查是否已存在initListener方法"""
         return 'public void initListener()' in code or 'protected void initListener()' in code
     
     def _create_init_view_method(self, code: str, init_view_code: str) -> str:
-        """创建initView方法"""
+        """创建initViews方法"""
         method_code = f"""
     @Override
-    protected void initView() {{
+    protected void initViews() {{
 {init_view_code}
     }}"""
         
@@ -230,10 +230,10 @@ class CodeInjector:
         return code
     
     def _update_init_view_method(self, code: str, init_view_code: str) -> str:
-        """更新现有的initView方法"""
-        # 查找initView方法并替换其内容
+        """更新现有的initViews方法"""
+        # 查找initViews方法并替换其内容
         pattern = re.compile(
-            r'(@Override\s*\n\s*(?:public|protected)\s+void\s+initView\s*\(\s*\)\s*\{)([^}]*)(\})',
+            r'(@Override\s*\n\s*(?:public|protected)\s+void\s+initViews\s*\(\s*\)\s*\{)([^}]*)(\})',
             re.MULTILINE | re.DOTALL
         )
         
