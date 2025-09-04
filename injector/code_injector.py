@@ -70,7 +70,7 @@ class CodeInjector:
                 field_type = bind_view['type']
                 
                 # 生成findViewById调用，确保在移除@BindView注解前先赋值
-                line = f"        {field_name} = ({field_type}) findViewById({resource_id});"
+                line = f"        {field_name} = findViewById({resource_id});"
                 lines.append(line)
             lines.append("")
         
@@ -91,20 +91,13 @@ class CodeInjector:
                         # 检查方法是否有View参数
                         has_view_param = on_click.get('has_view_param', True)  # 默认为True保持向后兼容
                         
-                        # 生成setOnClickListener调用，调用保留的完整方法
-                        lines.append(f"        {view_name}.setOnClickListener(new View.OnClickListener() {{")
-                        lines.append(f"            @Override")
-                        lines.append(f"            public void onClick(View v) {{")
-                        
+                        # 生成setOnClickListener调用，使用Lambda表达式
                         if has_view_param:
                             # 如果方法有View参数，传入v
-                            lines.append(f"                {method_name}(v);")
+                            lines.append(f"        {view_name}.setOnClickListener(v -> {method_name}(v));")
                         else:
                             # 如果方法没有View参数，不传入v
-                            lines.append(f"                {method_name}();")
-                        
-                        lines.append(f"            }}")
-                        lines.append(f"        }});")
+                            lines.append(f"        {view_name}.setOnClickListener(v -> {method_name}());")
                         lines.append("")
         
         return '\n'.join(lines)
@@ -123,7 +116,7 @@ class CodeInjector:
                 resource_id = bind_view['id']
                 field_type = bind_view['type']
                 
-                line = f"        {field_name} = ({field_type}) findViewById({resource_id});"
+                line = f"        {field_name} = findViewById({resource_id});"
                 init_view_lines.append(line)
         
         # 生成initListener方法代码
@@ -142,20 +135,13 @@ class CodeInjector:
                         # 检查方法是否有View参数
                         has_view_param = on_click.get('has_view_param', True)  # 默认为True保持向后兼容
                         
-                        # 生成setOnClickListener调用，调用保留的完整方法
-                        init_listener_lines.append(f"        {view_name}.setOnClickListener(new View.OnClickListener() {{")
-                        init_listener_lines.append(f"            @Override")
-                        init_listener_lines.append(f"            public void onClick(View v) {{")
-                        
+                        # 生成setOnClickListener调用，使用Lambda表达式
                         if has_view_param:
                             # 如果方法有View参数，传入v
-                            init_listener_lines.append(f"                {method_name}(v);")
+                            init_listener_lines.append(f"        {view_name}.setOnClickListener(v -> {method_name}(v));")
                         else:
                             # 如果方法没有View参数，不传入v
-                            init_listener_lines.append(f"                {method_name}();")
-                        
-                        init_listener_lines.append(f"            }}")
-                        init_listener_lines.append(f"        }});")
+                            init_listener_lines.append(f"        {view_name}.setOnClickListener(v -> {method_name}());")
                         init_listener_lines.append("")
         
         return {
