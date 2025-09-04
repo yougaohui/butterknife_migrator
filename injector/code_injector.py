@@ -169,8 +169,9 @@ class CodeInjector:
         }
     
     def _is_newbase_activity(self, code: str) -> bool:
-        """检查是否继承自NewBaseActivity或NewBaseFragment"""
-        newbase_patterns = [
+        """检查是否继承自NewBaseActivity或NewBaseFragment（递归检查继承链）"""
+        # 首先检查直接继承
+        direct_patterns = [
             r'extends\s+NewBaseActivity',
             r'extends\s+\w*NewBaseActivity',
             r'extends\s+NewBaseFragment',
@@ -179,11 +180,57 @@ class CodeInjector:
             r'implements\s+.*NewBaseFragment'
         ]
         
-        for pattern in newbase_patterns:
+        for pattern in direct_patterns:
             if re.search(pattern, code, re.MULTILINE):
                 return True
         
+        # 如果没有直接继承，递归检查继承链
+        return self._check_inheritance_chain(code)
+    
+    def _check_inheritance_chain(self, code: str) -> bool:
+        """递归检查继承链中是否包含NewBaseActivity或NewBaseFragment"""
+        # 查找当前类的extends声明
+        extends_match = re.search(r'class\s+\w+\s+extends\s+(\w+)', code)
+        if not extends_match:
+            return False
+        
+        parent_class = extends_match.group(1)
+        
+        # 如果父类就是NewBaseActivity或NewBaseFragment，直接返回True
+        if 'NewBaseActivity' in parent_class or 'NewBaseFragment' in parent_class:
+            return True
+        
+        # 尝试查找父类的定义（在同一个文件中）
+        parent_class_pattern = rf'class\s+{re.escape(parent_class)}\s+extends\s+(\w+)'
+        parent_extends_match = re.search(parent_class_pattern, code)
+        
+        if parent_extends_match:
+            grandparent_class = parent_extends_match.group(1)
+            # 递归检查祖父类
+            if 'NewBaseActivity' in grandparent_class or 'NewBaseFragment' in grandparent_class:
+                return True
+            # 继续递归检查更深层的继承
+            return self._check_deeper_inheritance(code, grandparent_class)
+        
         return False
+    
+    def _check_deeper_inheritance(self, code: str, class_name: str) -> bool:
+        """检查更深层的继承关系"""
+        # 查找指定类的extends声明
+        class_pattern = rf'class\s+{re.escape(class_name)}\s+extends\s+(\w+)'
+        extends_match = re.search(class_pattern, code)
+        
+        if not extends_match:
+            return False
+        
+        parent_class = extends_match.group(1)
+        
+        # 如果找到NewBaseActivity或NewBaseFragment，返回True
+        if 'NewBaseActivity' in parent_class or 'NewBaseFragment' in parent_class:
+            return True
+        
+        # 继续递归检查
+        return self._check_deeper_inheritance(code, parent_class)
     
     def _inject_for_newbase_activity(self, code: str, parsed_data: Dict[str, Any]) -> str:
         """为继承NewBaseActivity或NewBaseFragment的类进行定制化注入"""
