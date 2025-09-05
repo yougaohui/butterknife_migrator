@@ -43,23 +43,20 @@ class CodeInjector:
         # 检查是否继承自NewBaseActivity或NewBaseFragment（优先级更高）
         if self._is_newbase_activity(code):
             print("DEBUG: 检测到继承自NewBaseActivity或NewBaseFragment，使用定制化处理")
-            return self._inject_for_newbase_activity(code, parsed_data)
-        
+            code = self._inject_for_newbase_activity(code, parsed_data)
         # 检查是否是Holder类
-        if self._is_holder_class(code):
+        elif self._is_holder_class(code):
             print("DEBUG: 检测到Holder类，使用Holder特殊处理")
-            return self._inject_for_holder_class(code, parsed_data)
+            code = self._inject_for_holder_class(code, parsed_data)
+        else:
+            # 获取需要注入的代码
+            injection_code = self._generate_injection_code(parsed_data)
+            
+            if injection_code:
+                # 只在onCreate方法中注入代码，不创建新方法
+                code = self._inject_in_oncreate_only(code, injection_code)
         
-        # 获取需要注入的代码
-        injection_code = self._generate_injection_code(parsed_data)
-        
-        if not injection_code:
-            return code
-        
-        # 只在onCreate方法中注入代码，不创建新方法
-        code = self._inject_in_oncreate_only(code, injection_code)
-        
-        # 处理内部类中的@BindView注解
+        # 处理内部类中的@BindView注解（在所有情况下都要处理）
         code = self._inject_inner_classes(code, parsed_data)
         
         return code
@@ -242,7 +239,9 @@ class CodeInjector:
             'mImgSelected', 'mColorPannelView',  # ColorHolder字段
             'mTvTitle', 'mItemList',             # MyHolder字段  
             'mImgPreview', 'mBtnInstall', 'mFrmPreview',  # WatchThme2ItemHolder字段
-            'mTvFileName', 'mCx'                 # CashLogDialogFragment.MyHolder字段
+            'mTvFileName', 'mCx',                # CashLogDialogFragment.MyHolder字段
+            'imgVator', 'tvName', 'tvIds', 'tvSteps',  # FriendsFragment.FriendItemHolder字段
+            'tvAddFriendTips', 'btnAgree', 'btnReject', 'tvLabel'  # UserIdeasActivity.MyHolderView字段
         ]
         
         if field_name in holder_field_names:
@@ -428,9 +427,6 @@ class CodeInjector:
                 print("DEBUG: 创建新的initListener方法")
                 code = self._create_init_listener_method(code, injection_codes['init_listener'])
         
-        # 处理内部类中的@BindView注解
-        code = self._inject_inner_classes(code, parsed_data)
-        
         return code
     
     def _inject_inner_classes(self, code: str, parsed_data: Dict[str, Any]) -> str:
@@ -448,6 +444,11 @@ class CodeInjector:
             
             # 检查是否是Holder类
             if 'Holder' in class_name and 'BaseHolder' in extends:
+                # 检查是否已经处理过这个类
+                class_content = code[class_start:class_end]
+                if '// 初始化View绑定 - 替换@BindView注解' in class_content:
+                    continue
+                
                 # 获取该Holder类特有的字段
                 holder_bind_views = self._get_holder_specific_fields(code, class_name, class_start, class_end, bind_views)
                 
@@ -521,6 +522,10 @@ class CodeInjector:
     def _inject_in_holder_constructor(self, code: str, class_start: int, class_end: int, holder_code: str) -> str:
         """在Holder类的构造器中注入代码"""
         class_content = code[class_start:class_end]
+        
+        # 检查是否已经注入了代码
+        if '// 初始化View绑定 - 替换@BindView注解' in class_content:
+            return code
         
         # 查找构造器
         constructor_pattern = re.compile(r'public\s+\w+\s*\([^)]*View\s+\w+[^)]*\)\s*\{', re.MULTILINE)
@@ -644,15 +649,10 @@ class CodeInjector:
         has_super_call = 'super.initViews()' in original_content
         
         # 构建新的方法内容
-        if original_content.strip():
-            # 如果原有内容不为空，在末尾追加
-            if has_super_call:
-                new_content = original_content + '\n' + init_view_code
-            else:
-                new_content = original_content + '\n        super.initViews();\n' + init_view_code
+        if has_super_call:
+            new_content = '        super.initViews();\n' + init_view_code
         else:
-            # 如果原有内容为空，直接添加新内容
-            new_content = '\n        super.initViews();\n' + init_view_code
+            new_content = '        super.initViews();\n' + init_view_code
         
         # 替换方法内容
         new_lines = lines[:method_start_line + 1] + [new_content] + lines[method_end_line:]
