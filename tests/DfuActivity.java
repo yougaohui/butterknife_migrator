@@ -689,31 +689,31 @@ public class DfuActivity extends BaseActivity implements CompoundButton.OnChecke
 
     protected void initViews() {
         // 初始化View绑定 - 替换@BindView注解
-        toolbar = findViewById(R2.id.toolbar);
-        tv_device_name = findViewById(R2.id.tv_device_name);
-        tv_device_address = findViewById(R2.id.tv_device_address);
-        rb_net = findViewById(R2.id.rb_net);
-        rl_chip_model = findViewById(R2.id.rl_chip_model);
-        et_chip_model = findViewById(R2.id.et_chip_model);
-        btn_sure = findViewById(R2.id.btn_sure);
-        rl_dfu_file = findViewById(R2.id.rl_dfu_file);
-        tv_dfu_file_name = findViewById(R2.id.tv_dfu_file_name);
-        iv_file_expload = findViewById(R2.id.iv_file_expload);
-        tv_update_desc = findViewById(R2.id.tv_update_desc);
-        rb_local = findViewById(R2.id.rb_local);
-        tl_file = findViewById(R2.id.tl_file);
-        tv_file_name = findViewById(R2.id.tv_file_name);
-        tv_file_size = findViewById(R2.id.tv_file_size);
-        tv_file_status = findViewById(R2.id.tv_file_status);
-        btn_select_file = findViewById(R2.id.btn_select_file);
-        btn_update = findViewById(R2.id.btn_update);
+        toolbar = findViewById(R.id.toolbar);
+        tv_device_name = findViewById(R.id.tv_device_name);
+        tv_device_address = findViewById(R.id.tv_device_address);
+        rb_net = findViewById(R.id.rb_net);
+        rl_chip_model = findViewById(R.id.rl_chip_model);
+        et_chip_model = findViewById(R.id.et_chip_model);
+        btn_sure = findViewById(R.id.btn_sure);
+        rl_dfu_file = findViewById(R.id.rl_dfu_file);
+        tv_dfu_file_name = findViewById(R.id.tv_dfu_file_name);
+        iv_file_expload = findViewById(R.id.iv_file_expload);
+        tv_update_desc = findViewById(R.id.tv_update_desc);
+        rb_local = findViewById(R.id.rb_local);
+        tl_file = findViewById(R.id.tl_file);
+        tv_file_name = findViewById(R.id.tv_file_name);
+        tv_file_size = findViewById(R.id.tv_file_size);
+        tv_file_status = findViewById(R.id.tv_file_status);
+        btn_select_file = findViewById(R.id.btn_select_file);
+        btn_update = findViewById(R.id.btn_update);
     }
 
     public void initListener() {
         // 初始化点击事件 - 替换@OnClick注解
-        findViewById(R2.id.btn_sure).setOnClickListener(v -> onClick(v));
-        findViewById(R2.id.iv_file_expload).setOnClickListener(v -> onClick(v));
-        findViewById(R2.id.btn_select_file).setOnClickListener(v -> onClick(v));
-        findViewById(R2.id.btn_update).setOnClickListener(v -> onClick(v));
+        findViewById(R.id.btn_sure).setOnClickListener(v -> onClick(v));
+        findViewById(R.id.iv_file_expload).setOnClickListener(v -> onClick(v));
+        findViewById(R.id.btn_select_file).setOnClickListener(v -> onClick(v));
+        findViewById(R.id.btn_update).setOnClickListener(v -> onClick(v));
     }
 }

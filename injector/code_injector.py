@@ -521,6 +521,9 @@ class CodeInjector:
             for bind_view in bind_views:
                 field_name = bind_view['name']
                 resource_id = bind_view['id']
+                # 将R2.id转换为R.id
+                if resource_id.startswith('R2.id.'):
+                    resource_id = resource_id.replace('R2.id.', 'R.id.')
                 lines.append(f"        {field_name} = findViewById({resource_id});")
         
         return '\n'.join(lines)
@@ -538,6 +541,9 @@ class CodeInjector:
                 has_view_param = on_click.get('has_view_param', False)
                 
                 for resource_id in resource_ids:
+                    # 将R2.id转换为R.id
+                    if resource_id.startswith('R2.id.'):
+                        resource_id = resource_id.replace('R2.id.', 'R.id.')
                     if has_view_param:
                         lines.append(f"        findViewById({resource_id}).setOnClickListener(v -> {method_name}(v));")
                     else:
