@@ -1034,29 +1034,22 @@ class CodeInjector:
         
         for line in lines:
             # 检查是否是ButterKnife相关的import语句
-            if (line.strip().startswith('import') and 
-                ('butterknife' in line.lower() or 
-                 'BindView' in line or 
-                 'OnClick' in line or
-                 'BindString' in line or
-                 'BindColor' in line or
-                 'BindDimen' in line or
-                 'BindDrawable' in line or
-                 'BindBitmap' in line or
-                 'BindInt' in line or
-                 'BindFloat' in line or
-                 'BindBoolean' in line or
-                 'BindArray' in line or
-                 'BindFont' in line or
-                 'BindAnim' in line or
-                 'BindAnimator' in line or
-                 'BindBool' in line or
-                 'BindDimen' in line or
-                 'BindDrawable' in line or
-                 'BindInt' in line or
-                 'BindString' in line)):
-                print(f"DEBUG: 移除ButterKnife import语句: {line.strip()}")
-                continue
+            stripped_line = line.strip()
+            if stripped_line.startswith('import'):
+                # 精确匹配以import butterknife开头的语句
+                if stripped_line.startswith('import butterknife'):
+                    print(f"DEBUG: 移除ButterKnife import语句: {stripped_line}")
+                    continue
+                # 也检查其他ButterKnife相关的import（以防有变体）
+                elif ('butterknife' in stripped_line.lower() or 
+                      any(annotation in stripped_line for annotation in [
+                          'BindView', 'OnClick', 'BindString', 'BindColor', 
+                          'BindDimen', 'BindDrawable', 'BindBitmap', 'BindInt', 
+                          'BindFloat', 'BindBoolean', 'BindArray', 'BindFont', 
+                          'BindAnim', 'BindAnimator', 'BindBool'
+                      ])):
+                    print(f"DEBUG: 移除ButterKnife相关import语句: {stripped_line}")
+                    continue
             filtered_lines.append(line)
         
         return '\n'.join(filtered_lines)
