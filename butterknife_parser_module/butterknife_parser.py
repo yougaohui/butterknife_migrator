@@ -16,12 +16,12 @@ class ButterKnifeParser:
     def __init__(self):
         # 编译正则表达式以提高性能
         self.bind_view_pattern = re.compile(
-            r'@BindView\s*\(\s*(R\.id\.\w+)\s*\)\s*\n\s*(?:public\s+|private\s+|protected\s+)?(\w+)\s+(\w+)\s*;',
+            r'@BindView\s*\(\s*(R2?\.id\.\w+)\s*\)\s*\n\s*(?:public\s+|private\s+|protected\s+)?(\w+)\s+(\w+)\s*;',
             re.MULTILINE | re.DOTALL
         )
         
         self.on_click_pattern = re.compile(
-            r'@OnClick\s*\(\s*(?:\{\s*)?((?:R\.id\.\w+(?:\s*,\s*R\.id\.\w+)*)?)(?:\s*\})?\s*\)\s*(?:public\s+)?(?:void\s+)?(\w+)\s*\([^)]*\)',
+            r'@OnClick\s*\(\s*(?:\{\s*)?((?:R2?\.id\.\w+(?:\s*,\s*R2?\.id\.\w+)*)?)(?:\s*\})?\s*\)\s*(?:public\s+)?(?:void\s+)?(\w+)\s*\([^)]*\)',
             re.MULTILINE
         )
         

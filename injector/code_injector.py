@@ -43,14 +43,18 @@ class CodeInjector:
         # 首先移除ButterKnife相关的import语句
         code = self._remove_butterknife_imports(code)
         
-        # 检查是否继承自NewBaseActivity或NewBaseFragment（优先级更高）
-        if self._is_newbase_activity(code):
-            print("DEBUG: 检测到继承自NewBaseActivity或NewBaseFragment，使用定制化处理")
-            code = self._inject_for_newbase_activity(code, parsed_data)
-        # 检查是否是Holder类
-        elif self._is_holder_class(code):
+        # 检查是否是Holder类（优先级最高）
+        if self._is_holder_class(code):
             print("DEBUG: 检测到Holder类，使用Holder特殊处理")
             code = self._inject_for_holder_class(code, parsed_data)
+        # 检查是否是普通Activity（有setContentView）
+        elif self._has_setcontentview(code):
+            print("DEBUG: 检测到普通Activity（有setContentView），使用通用迁移处理")
+            code = self._inject_for_general_activity(code, parsed_data)
+        # 检查是否继承自NewBaseActivity或NewBaseFragment
+        elif self._is_newbase_activity(code):
+            print("DEBUG: 检测到继承自NewBaseActivity或NewBaseFragment，使用定制化处理")
+            code = self._inject_for_newbase_activity(code, parsed_data)
         else:
             # 获取需要注入的代码
             injection_code = self._generate_injection_code(parsed_data)
@@ -432,6 +436,239 @@ class CodeInjector:
                 code = self._create_init_listener_method(code, injection_codes['init_listener'])
         
         return code
+    
+    def _remove_butterknife_annotations(self, code: str, parsed_data: Dict[str, Any]) -> str:
+        """移除ButterKnife注解"""
+        # 移除@BindView注解
+        bind_views = parsed_data.get('bind_views', [])
+        for bind_view in bind_views:
+            original_line = bind_view.get('original_line', '')
+            if original_line in code:
+                code = code.replace(original_line, '')
+        
+        # 移除@OnClick注解
+        on_clicks = parsed_data.get('on_clicks', [])
+        for on_click in on_clicks:
+            original_line = on_click.get('original_line', '')
+            if original_line in code:
+                code = code.replace(original_line, '')
+        
+        return code
+    
+    def _has_setcontentview(self, code: str) -> bool:
+        """检查是否有setContentView调用（本地或父类中）"""
+        # 检查本地是否有setContentView
+        if re.search(r'setContentView\s*\(', code):
+            return True
+        
+        # 检查父类是否有setContentView（通过检查是否有getLayoutId方法）
+        if re.search(r'public\s+int\s+getLayoutId\s*\(\s*\)', code):
+            return True
+        
+        # 检查是否是常见的基类（这些基类通常有setContentView）
+        common_activity_classes = [
+            'BaseActivity', 'AppCompatActivity', 'Activity', 'FragmentActivity',
+            'BaseFragment', 'Fragment', 'DialogFragment'
+        ]
+        
+        # 查找类定义
+        class_match = re.search(r'public\s+class\s+\w+\s+extends\s+(\w+)', code)
+        if class_match:
+            parent_class = class_match.group(1)
+            if parent_class in common_activity_classes:
+                return True
+        
+        return False
+    
+    def _inject_for_general_activity(self, code: str, parsed_data: Dict[str, Any]) -> str:
+        """为普通Activity进行通用迁移处理"""
+        # 移除ButterKnife注解
+        code = self._remove_butterknife_annotations(code, parsed_data)
+        
+        # 生成initViews和initListener方法
+        init_views_code = self._generate_init_views_for_general_activity(parsed_data)
+        init_listener_code = self._generate_init_listener_for_general_activity(parsed_data)
+        
+        # 检查方法是否已存在，如果存在则更新，否则创建
+        if init_views_code:
+            if self._has_method(code, 'initViews'):
+                print("DEBUG: initViews方法已存在，更新其内容")
+                code = self._update_method(code, 'initViews', init_views_code)
+            else:
+                print("DEBUG: 创建新的initViews方法")
+                code = self._create_method(code, 'initViews', init_views_code, 'protected')
+        
+        if init_listener_code:
+            if self._has_method(code, 'initListener'):
+                print("DEBUG: initListener方法已存在，更新其内容")
+                code = self._update_method(code, 'initListener', init_listener_code)
+            else:
+                print("DEBUG: 创建新的initListener方法")
+                code = self._create_method(code, 'initListener', init_listener_code, 'public')
+        
+        # 在onCreate方法中调用initViews和initListener
+        code = self._inject_method_calls_in_oncreate(code)
+        
+        return code
+    
+    def _generate_init_views_for_general_activity(self, parsed_data: Dict[str, Any]) -> str:
+        """为普通Activity生成initViews方法内容"""
+        lines = []
+        bind_views = parsed_data.get('bind_views', [])
+        
+        if bind_views:
+            lines.append("        // 初始化View绑定 - 替换@BindView注解")
+            for bind_view in bind_views:
+                field_name = bind_view['name']
+                resource_id = bind_view['id']
+                lines.append(f"        {field_name} = findViewById({resource_id});")
+        
+        return '\n'.join(lines)
+    
+    def _generate_init_listener_for_general_activity(self, parsed_data: Dict[str, Any]) -> str:
+        """为普通Activity生成initListener方法内容"""
+        lines = []
+        on_clicks = parsed_data.get('on_clicks', [])
+        
+        if on_clicks:
+            lines.append("        // 初始化点击事件 - 替换@OnClick注解")
+            for on_click in on_clicks:
+                resource_ids = on_click['ids']
+                method_name = on_click['method']
+                has_view_param = on_click.get('has_view_param', False)
+                
+                for resource_id in resource_ids:
+                    if has_view_param:
+                        lines.append(f"        findViewById({resource_id}).setOnClickListener(v -> {method_name}(v));")
+                    else:
+                        lines.append(f"        findViewById({resource_id}).setOnClickListener(v -> {method_name}());")
+        
+        return '\n'.join(lines)
+    
+    def _has_method(self, code: str, method_name: str) -> bool:
+        """检查方法是否存在"""
+        pattern = rf'(public|protected|private)\s+.*\s+{re.escape(method_name)}\s*\('
+        return bool(re.search(pattern, code))
+    
+    def _update_method(self, code: str, method_name: str, new_content: str) -> str:
+        """更新现有方法的内容"""
+        lines = code.split('\n')
+        method_start = -1
+        method_end = -1
+        brace_count = 0
+        in_method = False
+        
+        for i, line in enumerate(lines):
+            # 查找方法开始
+            if re.search(rf'(public|protected|private)\s+.*\s+{re.escape(method_name)}\s*\(', line):
+                method_start = i
+                in_method = True
+                continue
+            
+            if in_method:
+                # 计算大括号
+                for char in line:
+                    if char == '{':
+                        brace_count += 1
+                    elif char == '}':
+                        brace_count -= 1
+                        if brace_count == 0:
+                            method_end = i
+                            break
+                
+                if method_end != -1:
+                    break
+        
+        if method_start != -1 and method_end != -1:
+            # 替换方法内容
+            new_lines = lines[:method_start + 1] + [new_content] + lines[method_end:]
+            return '\n'.join(new_lines)
+        
+        return code
+    
+    def _create_method(self, code: str, method_name: str, content: str, visibility: str) -> str:
+        """创建新方法"""
+        # 查找类的结束位置
+        class_end = self._find_class_end(code)
+        print(f"DEBUG: 查找类结束位置: {class_end}")
+        if class_end == -1:
+            print("DEBUG: 未找到类结束位置，无法创建方法")
+            return code
+        
+        # 生成方法
+        method = f"\n    {visibility} void {method_name}() {{\n{content}\n    }}"
+        print(f"DEBUG: 创建方法: {method}")
+        
+        # 在类结束前插入方法（在最后一个}之前）
+        lines = code.split('\n')
+        if class_end < len(lines):
+            # 在指定行之前插入方法
+            lines.insert(class_end, method)
+            return '\n'.join(lines)
+        else:
+            # 如果位置超出范围，在文件末尾添加
+            return code + method
+    
+    def _find_class_end(self, code: str) -> int:
+        """查找类的结束位置"""
+        lines = code.split('\n')
+        brace_count = 0
+        in_class = False
+        
+        for i, line in enumerate(lines):
+            # 查找类开始
+            if re.search(r'public\s+class\s+\w+', line):
+                in_class = True
+                # 找到类开始行，开始计算大括号
+                for char in line:
+                    if char == '{':
+                        brace_count += 1
+                continue
+            
+            if in_class:
+                # 计算大括号
+                for char in line:
+                    if char == '{':
+                        brace_count += 1
+                    elif char == '}':
+                        brace_count -= 1
+                        if brace_count == 0:
+                            return i
+        
+        return -1
+    
+    def _inject_method_calls_in_oncreate(self, code: str) -> str:
+        """在onCreate方法中注入initViews和initListener调用"""
+        # 查找onCreate方法
+        onCreate_pattern = r'protected\s+void\s+onCreate\s*\([^)]*Bundle\s+savedInstanceState[^)]*\)\s*\{'
+        match = re.search(onCreate_pattern, code)
+        
+        if not match:
+            return code
+        
+        # 查找onCreate方法的结束位置
+        start_pos = match.end()
+        brace_count = 1
+        end_pos = start_pos
+        
+        for i in range(start_pos, len(code)):
+            if code[i] == '{':
+                brace_count += 1
+            elif code[i] == '}':
+                brace_count -= 1
+                if brace_count == 0:
+                    end_pos = i
+                    break
+        
+        # 检查onCreate方法中是否已经存在调用
+        onCreate_content = code[start_pos:end_pos]
+        if 'initViews();' in onCreate_content and 'initListener();' in onCreate_content:
+            print("DEBUG: onCreate方法中initViews和initListener调用已存在，跳过注入")
+            return code
+        
+        # 在onCreate方法中添加调用
+        method_calls = "\n        initViews();\n        initListener();"
+        return code[:end_pos] + method_calls + code[end_pos:]
     
     def _inject_inner_classes(self, code: str, parsed_data: Dict[str, Any]) -> str:
         """处理内部类中的@BindView注解"""
@@ -994,18 +1231,18 @@ class CodeInjector:
             # 如果没有找到setContentView，在onCreate方法末尾注入
             method_end = self._find_oncreate_method_end(code, method_start)
             print(f"DEBUG: 没有找到setContentView，在onCreate方法末尾注入，位置: {method_end}")
+        
+        if method_end > method_start:
+            before_end = code[:method_end]
+            after_end = code[method_end:]
             
-            if method_end > method_start:
-                before_end = code[:method_end]
-                after_end = code[method_end:]
-                
-                if not self._has_injection_code(before_end, injection_code):
-                    print(f"DEBUG: 注入代码到onCreate方法末尾")
-                    result = before_end + '\n' + injection_code + '\n    ' + after_end
-                    print(f"DEBUG: 注入后的代码长度: {len(result)}")
-                    return result
-                else:
-                    print(f"DEBUG: 代码已经存在，跳过注入")
+            if not self._has_injection_code(before_end, injection_code):
+                print(f"DEBUG: 注入代码到onCreate方法末尾")
+                result = before_end + '\n' + injection_code + '\n    ' + after_end
+                print(f"DEBUG: 注入后的代码长度: {len(result)}")
+                return result
+            else:
+                print(f"DEBUG: 代码已经存在，跳过注入")
         
         return code
     

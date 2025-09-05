@@ -1,20 +1,13 @@
 {
-  "total_files": 3,
-  "successful_migrations": 3,
+  "total_files": 2,
+  "successful_migrations": 2,
   "failed_migrations": 0,
   "details": [
     {
-      "file": "HomeBaseFragment.java",
+      "file": "DfuActivity.java",
       "status": "success",
-      "bind_views_count": 0,
-      "on_clicks_count": 0,
-      "has_bind_call": false
-    },
-    {
-      "file": "HomeFragmentNew.java",
-      "status": "success",
-      "bind_views_count": 0,
-      "on_clicks_count": 0,
+      "bind_views_count": 18,
+      "on_clicks_count": 1,
       "has_bind_call": false
     },
     {
