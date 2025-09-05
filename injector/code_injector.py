@@ -59,6 +59,9 @@ class CodeInjector:
         # 只在onCreate方法中注入代码，不创建新方法
         code = self._inject_in_oncreate_only(code, injection_code)
         
+        # 处理内部类中的@BindView注解
+        code = self._inject_inner_classes(code, parsed_data)
+        
         return code
     
     def _generate_injection_code(self, parsed_data: Dict[str, Any]) -> str:
@@ -205,7 +208,8 @@ class CodeInjector:
                 return True
         
         # 检查是否有getLayoutId方法（NewBaseActivity的典型特征）
-        if re.search(r'public\s+int\s+getLayoutId\s*\(', code, re.MULTILINE):
+        # 必须是无参数的getLayoutId方法，不是getLayoutId(int viewType)
+        if re.search(r'public\s+int\s+getLayoutId\s*\(\s*\)', code, re.MULTILINE):
             return True
         
         # 如果没有直接继承，递归检查继承链
@@ -213,37 +217,38 @@ class CodeInjector:
     
     def _is_holder_class(self, code: str) -> bool:
         """检查是否是Holder类（继承自BaseHolder）"""
-        # 检查是否有任何类继承自BaseHolder
-        if re.search(r'extends\s+.*BaseHolder', code, re.MULTILINE):
+        # 只检查最外层的类（第一个class声明）
+        first_class_match = re.search(r'public\s+class\s+(\w+)(?:\s+extends\s+(\w+))?', code)
+        if not first_class_match:
+            return False
+        
+        class_name = first_class_match.group(1)
+        parent_class = first_class_match.group(2) if first_class_match.group(2) else None
+        
+        # 检查是否直接继承BaseHolder
+        if parent_class and 'BaseHolder' in parent_class:
             return True
         
-        # 检查是否有任何类名包含Holder（排除Activity和Fragment）
-        class_matches = re.findall(r'class\s+(\w+)', code)
-        for class_name in class_matches:
-            if 'Holder' in class_name and 'Activity' not in class_name and 'Fragment' not in class_name:
-                return True
+        # 检查类名是否包含Holder，但排除Activity和Fragment
+        if 'Holder' in class_name and 'Activity' not in class_name and 'Fragment' not in class_name:
+            return True
         
         return False
     
     def _is_main_class_field(self, field_name: str, bind_views: List[Dict]) -> bool:
         """检查字段是否属于主类（简单启发式方法）"""
-        # 如果字段名以m开头且不是典型的Holder字段名，则认为是主类字段
-        if field_name.startswith('m') and not field_name.startswith('mImg') and not field_name.startswith('mColor'):
-            return True
+        # 明确的Holder字段名
+        holder_field_names = [
+            'mImgSelected', 'mColorPannelView',  # ColorHolder字段
+            'mTvTitle', 'mItemList',             # MyHolder字段  
+            'mImgPreview', 'mBtnInstall', 'mFrmPreview',  # WatchThme2ItemHolder字段
+            'mTvFileName', 'mCx'                 # CashLogDialogFragment.MyHolder字段
+        ]
         
-        # 如果字段名是典型的Activity/Fragment字段名，则认为是主类字段
-        main_class_indicators = ['mColorList', 'mPreview', 'mRad', 'mFrm', 'mBtn', 'mTv', 'mEt', 'mIv']
-        for indicator in main_class_indicators:
-            if field_name.startswith(indicator):
-                return True
+        if field_name in holder_field_names:
+            return False
         
-        # 如果字段名是典型的Holder字段名，则认为是内部类字段
-        holder_indicators = ['mImgSelected', 'mColorPannelView']
-        for indicator in holder_indicators:
-            if field_name == indicator:
-                return False
-        
-        # 默认认为是主类字段
+        # 其他字段默认认为是主类字段
         return True
     
     def _generate_holder_injection_code(self, parsed_data: Dict[str, Any]) -> str:
@@ -439,11 +444,12 @@ class CodeInjector:
             class_name = inner_class['name']
             class_start = inner_class['start']
             class_end = inner_class['end']
+            extends = inner_class.get('extends', '')
             
             # 检查是否是Holder类
-            if 'Holder' in class_name and 'BaseHolder' in inner_class.get('extends', ''):
-                # 为Holder类生成初始化代码
-                holder_bind_views = [bv for bv in bind_views if not self._is_main_class_field(bv['name'], bind_views)]
+            if 'Holder' in class_name and 'BaseHolder' in extends:
+                # 获取该Holder类特有的字段
+                holder_bind_views = self._get_holder_specific_fields(code, class_name, class_start, class_end, bind_views)
                 
                 if holder_bind_views:
                     holder_code = self._generate_holder_injection_code({'bind_views': holder_bind_views, 'on_clicks': []})
@@ -452,6 +458,24 @@ class CodeInjector:
                     code = self._inject_in_holder_constructor(code, class_start, class_end, holder_code)
         
         return code
+    
+    def _get_holder_specific_fields(self, code: str, class_name: str, class_start: int, class_end: int, bind_views: List[Dict]) -> List[Dict]:
+        """获取特定Holder类中的字段"""
+        # 提取该类的代码段
+        class_code = code[class_start:class_end]
+        
+        # 查找该类中声明的字段
+        holder_fields = []
+        for bind_view in bind_views:
+            field_name = bind_view['name']
+            field_type = bind_view['type']
+            
+            # 更精确的字段声明检测：查找 "类型 字段名;" 的模式
+            field_declaration_pattern = f"{field_type} {field_name};"
+            if field_declaration_pattern in class_code:
+                holder_fields.append(bind_view)
+        
+        return holder_fields
     
     def _find_inner_classes(self, code: str) -> List[Dict]:
         """查找所有内部类"""
@@ -559,9 +583,10 @@ class CodeInjector:
         # 在类的结束位置前插入方法
         class_end_pos = self._find_class_end_position(code)
         if class_end_pos != -1:
-            before_end = code[:class_end_pos]
-            after_end = code[class_end_pos:]
-            return before_end + method_code + after_end
+            # 在类的结束大括号之前插入方法
+            before_end = code[:class_end_pos-1]  # 减去1，在结束大括号之前插入
+            after_end = code[class_end_pos-1:]   # 从结束大括号开始
+            return before_end + method_code + "\n" + after_end
         
         return code
     
@@ -576,9 +601,10 @@ class CodeInjector:
         # 在类的结束位置前插入方法
         class_end_pos = self._find_class_end_position(code)
         if class_end_pos != -1:
-            before_end = code[:class_end_pos]
-            after_end = code[class_end_pos:]
-            return before_end + method_code + after_end
+            # 在类的结束大括号之前插入方法
+            before_end = code[:class_end_pos-1]  # 减去1，在结束大括号之前插入
+            after_end = code[class_end_pos-1:]   # 从结束大括号开始
+            return before_end + method_code + "\n" + after_end
         
         return code
     
@@ -678,18 +704,48 @@ class CodeInjector:
     
     def _find_class_end_position(self, code: str) -> int:
         """找到类的真正结束位置（最后一个大括号）"""
-        # 使用更简单的方法：找到最后一个独立的 '}'
-        lines = code.split('\n')
+        # 使用更精确的方法：找到最外层类的结束大括号
+        brace_count = 0
+        in_string = False
+        string_char = None
+        in_comment = False
+        class_started = False
         
-        # 从后往前查找最后一个大括号
-        for i in range(len(lines) - 1, -1, -1):
-            line = lines[i].strip()
-            if line == '}':
-                # 找到最后一个大括号，计算其在原代码中的位置
-                pos = 0
-                for j in range(i):
-                    pos += len(lines[j]) + 1  # +1 for newline
-                return pos
+        for i, char in enumerate(code):
+            # 处理注释
+            if not in_string and not in_comment:
+                if i < len(code) - 1 and code[i:i+2] == '/*':
+                    in_comment = True
+                    continue
+            elif in_comment:
+                if i < len(code) - 1 and code[i:i+2] == '*/':
+                    in_comment = False
+                    continue
+                continue
+            
+            # 处理字符串字面量
+            if char == '"' or char == "'":
+                if not in_string:
+                    in_string = True
+                    string_char = char
+                elif char == string_char:
+                    in_string = False
+                    string_char = None
+                continue
+            
+            if in_string or in_comment:
+                continue
+            
+            if char == '{':
+                if not class_started:
+                    # 找到第一个开括号，说明类开始了
+                    class_started = True
+                brace_count += 1
+            elif char == '}':
+                brace_count -= 1
+                if class_started and brace_count == 0:
+                    # 找到匹配的闭括号，这是类的结束位置
+                    return i + 1
         
         return -1
     

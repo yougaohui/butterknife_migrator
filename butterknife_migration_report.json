@@ -1,40 +1,19 @@
 {
-  "total_files": 5,
-  "successful_migrations": 5,
+  "total_files": 2,
+  "successful_migrations": 2,
   "failed_migrations": 0,
   "details": [
     {
-      "file": "HabbitDrinksFragment.java",
+      "file": "ClockDialTuiJianFragment.java",
       "status": "success",
       "bind_views_count": 1,
       "on_clicks_count": 0,
       "has_bind_call": false
     },
     {
-      "file": "HabbitEatFragment.java",
+      "file": "WatchTheme2DetailsActivity.java",
       "status": "success",
-      "bind_views_count": 1,
-      "on_clicks_count": 0,
-      "has_bind_call": false
-    },
-    {
-      "file": "HabbitOtherFragment.java",
-      "status": "success",
-      "bind_views_count": 1,
-      "on_clicks_count": 0,
-      "has_bind_call": false
-    },
-    {
-      "file": "HabbitSleepFragment.java",
-      "status": "success",
-      "bind_views_count": 1,
-      "on_clicks_count": 0,
-      "has_bind_call": false
-    },
-    {
-      "file": "HabbitSportFragment.java",
-      "status": "success",
-      "bind_views_count": 1,
+      "bind_views_count": 0,
       "on_clicks_count": 0,
       "has_bind_call": false
     }
