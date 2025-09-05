@@ -1,8 +1,15 @@
 {
-  "total_files": 3,
-  "successful_migrations": 3,
+  "total_files": 5,
+  "successful_migrations": 5,
   "failed_migrations": 0,
   "details": [
+    {
+      "file": "AboutActivity.java",
+      "status": "success",
+      "bind_views_count": 0,
+      "on_clicks_count": 0,
+      "has_bind_call": false
+    },
     {
       "file": "DfuActivity.java",
       "status": "success",
@@ -12,6 +19,13 @@
     },
     {
       "file": "TestActivityWithExistingInitViews.java",
+      "status": "success",
+      "bind_views_count": 0,
+      "on_clicks_count": 0,
+      "has_bind_call": false
+    },
+    {
+      "file": "TestOnLongClickActivity.java",
       "status": "success",
       "bind_views_count": 2,
       "on_clicks_count": 1,

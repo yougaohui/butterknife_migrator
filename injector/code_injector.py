@@ -56,12 +56,12 @@ class CodeInjector:
             print("DEBUG: 检测到继承自NewBaseActivity或NewBaseFragment，使用定制化处理")
             code = self._inject_for_newbase_activity(code, parsed_data)
         else:
-        # 获取需要注入的代码
-        injection_code = self._generate_injection_code(parsed_data)
-        
+            # 获取需要注入的代码
+            injection_code = self._generate_injection_code(parsed_data)
+            
             if injection_code:
-        # 只在onCreate方法中注入代码，不创建新方法
-        code = self._inject_in_oncreate_only(code, injection_code)
+                # 只在onCreate方法中注入代码，不创建新方法
+                code = self._inject_in_oncreate_only(code, injection_code)
         
         # 处理内部类中的@BindView注解（在所有情况下都要处理）
         code = self._inject_inner_classes(code, parsed_data)
@@ -116,12 +116,42 @@ class CodeInjector:
                             lines.append(f"        {view_name}.setOnClickListener(v -> {method_name}());")
                         lines.append("")
         
+        # 处理@OnLongClick注解
+        on_long_clicks = parsed_data.get('on_long_clicks', [])
+        if on_long_clicks:
+            lines.append("        // 初始化长按事件 - 替换@OnLongClick注解")
+            for on_long_click in on_long_clicks:
+                resource_ids = on_long_click['ids']
+                method_name = on_long_click['method']
+                
+                for resource_id in resource_ids:
+                    # 查找对应的View变量名
+                    view_name = self._find_view_name_for_resource_id(resource_id, bind_views)
+                    
+                    if view_name:
+                        # 检查方法是否有View参数
+                        has_view_param = on_long_click.get('has_view_param', True)  # 默认为True保持向后兼容
+                        
+                        # 生成setOnLongClickListener调用，使用Lambda表达式
+                        if has_view_param:
+                            # 如果方法有View参数，传入v（可能需要强转）
+                            param_type = on_long_click.get('param_type', 'View')
+                            if param_type == 'View':
+                                lines.append(f"        {view_name}.setOnLongClickListener(v -> {method_name}(v));")
+                            else:
+                                lines.append(f"        {view_name}.setOnLongClickListener(v -> {method_name}(({param_type}) v));")
+                        else:
+                            # 如果方法没有View参数，不传入v
+                            lines.append(f"        {view_name}.setOnLongClickListener(v -> {method_name}());")
+                        lines.append("")
+        
         return '\n'.join(lines)
     
     def _generate_newbase_injection_code(self, parsed_data: Dict[str, Any]) -> Dict[str, str]:
         """为继承NewBaseActivity的类生成定制化注入代码"""
         bind_views = parsed_data.get('bind_views', [])
         on_clicks = parsed_data.get('on_clicks', [])
+        on_long_clicks = parsed_data.get('on_long_clicks', [])
         
         # 收集所有需要findViewById的ID
         all_resource_ids = set()
@@ -133,6 +163,10 @@ class CodeInjector:
         # 从@OnClick注解收集ID
         for on_click in on_clicks:
             all_resource_ids.update(on_click['ids'])
+        
+        # 从@OnLongClick注解收集ID
+        for on_long_click in on_long_clicks:
+            all_resource_ids.update(on_long_click['ids'])
         
         # 生成initView方法代码
         init_view_lines = []
@@ -188,6 +222,45 @@ class CodeInjector:
                                     init_listener_lines.append(f"        findViewById({resource_id}).setOnClickListener(v -> {method_name}(({param_type}) v));")
                             else:
                                 init_listener_lines.append(f"        findViewById({resource_id}).setOnClickListener(v -> {method_name}());")
+                        init_listener_lines.append("")
+        
+        if on_long_clicks:
+            init_listener_lines.append("        // 初始化长按事件 - 替换@OnLongClick注解")
+            for on_long_click in on_long_clicks:
+                resource_ids = on_long_click['ids']
+                method_name = on_long_click['method']
+                
+                for resource_id in resource_ids:
+                    # 查找对应的View变量名
+                    view_name = self._find_view_name_for_resource_id(resource_id, bind_views)
+                    
+                    if view_name:
+                        # 检查方法是否有View参数
+                        has_view_param = on_long_click.get('has_view_param', True)  # 默认为True保持向后兼容
+                        
+                        # 检查这个View是否已经在@BindView中声明
+                        bind_view_ids = {bind_view['id'] for bind_view in bind_views}
+                        
+                        if resource_id in bind_view_ids:
+                            # 如果View已经在@BindView中声明，直接使用成员变量
+                            if has_view_param:
+                                param_type = on_long_click.get('param_type', 'View')
+                                if param_type == 'View':
+                                    init_listener_lines.append(f"        {view_name}.setOnLongClickListener(v -> {method_name}(v));")
+                                else:
+                                    init_listener_lines.append(f"        {view_name}.setOnLongClickListener(v -> {method_name}(({param_type}) v));")
+                            else:
+                                init_listener_lines.append(f"        {view_name}.setOnLongClickListener(v -> {method_name}());")
+                        else:
+                            # 如果View没有在@BindView中声明，直接在initListener中获取并设置监听器
+                            if has_view_param:
+                                param_type = on_long_click.get('param_type', 'View')
+                                if param_type == 'View':
+                                    init_listener_lines.append(f"        findViewById({resource_id}).setOnLongClickListener(v -> {method_name}(v));")
+                                else:
+                                    init_listener_lines.append(f"        findViewById({resource_id}).setOnLongClickListener(v -> {method_name}(({param_type}) v));")
+                            else:
+                                init_listener_lines.append(f"        findViewById({resource_id}).setOnLongClickListener(v -> {method_name}());")
                         init_listener_lines.append("")
         
         return {
@@ -453,6 +526,13 @@ class CodeInjector:
             if original_line in code:
                 code = code.replace(original_line, '')
         
+        # 移除@OnLongClick注解
+        on_long_clicks = parsed_data.get('on_long_clicks', [])
+        for on_long_click in on_long_clicks:
+            original_line = on_long_click.get('original_line', '')
+            if original_line in code:
+                code = code.replace(original_line, '')
+        
         return code
     
     def _has_setcontentview(self, code: str) -> bool:
@@ -532,6 +612,7 @@ class CodeInjector:
         """为普通Activity生成initListener方法内容"""
         lines = []
         on_clicks = parsed_data.get('on_clicks', [])
+        on_long_clicks = parsed_data.get('on_long_clicks', [])
         
         if on_clicks:
             lines.append("        // 初始化点击事件 - 替换@OnClick注解")
@@ -548,6 +629,22 @@ class CodeInjector:
                         lines.append(f"        findViewById({resource_id}).setOnClickListener(v -> {method_name}(v));")
                     else:
                         lines.append(f"        findViewById({resource_id}).setOnClickListener(v -> {method_name}());")
+        
+        if on_long_clicks:
+            lines.append("        // 初始化长按事件 - 替换@OnLongClick注解")
+            for on_long_click in on_long_clicks:
+                resource_ids = on_long_click['ids']
+                method_name = on_long_click['method']
+                has_view_param = on_long_click.get('has_view_param', False)
+                
+                for resource_id in resource_ids:
+                    # 将R2.id转换为R.id
+                    if resource_id.startswith('R2.id.'):
+                        resource_id = resource_id.replace('R2.id.', 'R.id.')
+                    if has_view_param:
+                        lines.append(f"        findViewById({resource_id}).setOnLongClickListener(v -> {method_name}(v));")
+                    else:
+                        lines.append(f"        findViewById({resource_id}).setOnLongClickListener(v -> {method_name}());")
         
         return '\n'.join(lines)
     

@@ -25,6 +25,11 @@ class ButterKnifeParser:
             re.MULTILINE
         )
         
+        self.on_long_click_pattern = re.compile(
+            r'@OnLongClick\s*\(\s*([^)]+)\s*\)\s*(?:public\s+)?(?:boolean\s+)?(\w+)\s*\([^)]*\)',
+            re.MULTILINE
+        )
+        
         self.bind_call_pattern = re.compile(
             r'ButterKnife\.bind\s*\(\s*this\s*\)\s*;',
             re.MULTILINE
@@ -37,6 +42,11 @@ class ButterKnifeParser:
         
         self.onclick_import_pattern = re.compile(
             r'import\s+butterknife\.OnClick\s*;',
+            re.MULTILINE
+        )
+        
+        self.onlongclick_import_pattern = re.compile(
+            r'import\s+butterknife\.OnLongClick\s*;',
             re.MULTILINE
         )
         
@@ -61,10 +71,12 @@ class ButterKnifeParser:
             'has_butterknife': False,
             'bind_views': [],
             'on_clicks': [],
+            'on_long_clicks': [],
             'bind_call': False,
             'imports': {
                 'bindview': False,
                 'onclick': False,
+                'onlongclick': False,
                 'butterknife': False
             },
             'class_info': {},
@@ -81,6 +93,9 @@ class ButterKnifeParser:
                 
                 # 解析@OnClick注解
                 result['on_clicks'] = self._parse_on_clicks(content)
+                
+                # 解析@OnLongClick注解
+                result['on_long_clicks'] = self._parse_on_long_clicks(content)
                 
                 # 检查ButterKnife.bind调用
                 result['bind_call'] = self._has_bind_call(content)
@@ -104,6 +119,7 @@ class ButterKnifeParser:
         return (
             '@BindView' in content or
             '@OnClick' in content or
+            '@OnLongClick' in content or
             'ButterKnife.bind' in content
         )
     
@@ -151,6 +167,37 @@ class ButterKnifeParser:
             })
         
         return on_clicks
+    
+    def _parse_on_long_clicks(self, content: str) -> List[Dict]:
+        """解析@OnLongClick注解"""
+        on_long_clicks = []
+        matches = self.on_long_click_pattern.findall(content)
+        
+        for match in matches:
+            resource_ids_str, method_name = match
+            
+            # 解析资源ID列表
+            if resource_ids_str.strip():
+                # 处理单个ID或多个ID的情况
+                if ',' in resource_ids_str:
+                    resource_ids = [rid.strip() for rid in resource_ids_str.split(',')]
+                else:
+                    resource_ids = [resource_ids_str.strip()]
+            else:
+                resource_ids = []
+            
+            # 检测方法是否有View参数
+            has_view_param, param_type = self._check_method_has_view_param(content, method_name.strip())
+            
+            on_long_clicks.append({
+                'ids': resource_ids,
+                'method': method_name.strip(),
+                'has_view_param': has_view_param,
+                'param_type': param_type,
+                'original_line': self._find_original_line(content, match[0])
+            })
+        
+        return on_long_clicks
     
     def _check_method_has_view_param(self, content: str, method_name: str) -> Tuple[bool, str]:
         """检查方法是否有View参数，并返回参数类型"""
@@ -204,6 +251,7 @@ class ButterKnifeParser:
         return {
             'bindview': bool(self.import_pattern.search(content)),
             'onclick': bool(self.onclick_import_pattern.search(content)),
+            'onlongclick': bool(self.onlongclick_import_pattern.search(content)),
             'butterknife': bool(self.butterknife_import_pattern.search(content))
         }
     
