@@ -40,6 +40,9 @@ class CodeInjector:
         if not parsed_data.get('has_butterknife', False):
             return code
         
+        # 首先移除ButterKnife相关的import语句
+        code = self._remove_butterknife_imports(code)
+        
         # 检查是否继承自NewBaseActivity或NewBaseFragment（优先级更高）
         if self._is_newbase_activity(code):
             print("DEBUG: 检测到继承自NewBaseActivity或NewBaseFragment，使用定制化处理")
@@ -377,7 +380,8 @@ class CodeInjector:
         # 这些基类通常继承自NewBaseActivity或NewBaseFragment
         common_base_classes = [
             'BaseActivity', 'BaseFragment', 'TabBaseFragment', 'TabBaseActivity',
-            'AppBaseActivity', 'AppBaseFragment', 'CommonBaseActivity', 'CommonBaseFragment'
+            'AppBaseActivity', 'AppBaseFragment', 'CommonBaseActivity', 'CommonBaseFragment',
+            'HomeBaseFragment'  # 添加HomeBaseFragment到已知基类列表
         ]
         
         for base_class in common_base_classes:
@@ -1022,3 +1026,37 @@ class CodeInjector:
                 info['injection_methods'].append('OnClickListener设置')
         
         return info
+    
+    def _remove_butterknife_imports(self, code: str) -> str:
+        """移除ButterKnife相关的import语句"""
+        lines = code.split('\n')
+        filtered_lines = []
+        
+        for line in lines:
+            # 检查是否是ButterKnife相关的import语句
+            if (line.strip().startswith('import') and 
+                ('butterknife' in line.lower() or 
+                 'BindView' in line or 
+                 'OnClick' in line or
+                 'BindString' in line or
+                 'BindColor' in line or
+                 'BindDimen' in line or
+                 'BindDrawable' in line or
+                 'BindBitmap' in line or
+                 'BindInt' in line or
+                 'BindFloat' in line or
+                 'BindBoolean' in line or
+                 'BindArray' in line or
+                 'BindFont' in line or
+                 'BindAnim' in line or
+                 'BindAnimator' in line or
+                 'BindBool' in line or
+                 'BindDimen' in line or
+                 'BindDrawable' in line or
+                 'BindInt' in line or
+                 'BindString' in line)):
+                print(f"DEBUG: 移除ButterKnife import语句: {line.strip()}")
+                continue
+            filtered_lines.append(line)
+        
+        return '\n'.join(filtered_lines)
