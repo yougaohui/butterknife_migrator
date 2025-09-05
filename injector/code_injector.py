@@ -141,7 +141,7 @@ class CodeInjector:
                             else:
                                 lines.append(f"        {view_name}.setOnLongClickListener(v -> {method_name}(({param_type}) v));")
                         else:
-                            # 如果方法没有View参数，不传入v
+                            # 如果方法没有View参数，不传入v，但需要返回boolean值
                             lines.append(f"        {view_name}.setOnLongClickListener(v -> {method_name}());")
                         lines.append("")
         
@@ -512,6 +512,8 @@ class CodeInjector:
     
     def _remove_butterknife_annotations(self, code: str, parsed_data: Dict[str, Any]) -> str:
         """移除ButterKnife注解"""
+        import re
+        
         # 移除@BindView注解
         bind_views = parsed_data.get('bind_views', [])
         for bind_view in bind_views:
@@ -530,8 +532,9 @@ class CodeInjector:
         on_long_clicks = parsed_data.get('on_long_clicks', [])
         for on_long_click in on_long_clicks:
             original_line = on_long_click.get('original_line', '')
-            if original_line in code:
-                code = code.replace(original_line, '')
+            # 使用正则表达式匹配，忽略缩进，并删除整行包括换行符
+            pattern = re.escape(original_line.strip())
+            code = re.sub(r'^\s*' + pattern + r'\s*\n?', '', code, flags=re.MULTILINE)
         
         return code
     

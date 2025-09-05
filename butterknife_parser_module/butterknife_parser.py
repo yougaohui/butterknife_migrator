@@ -203,7 +203,7 @@ class ButterKnifeParser:
         """检查方法是否有View参数，并返回参数类型"""
         # 查找方法定义
         method_pattern = re.compile(
-            rf'(?:public\s+|private\s+|protected\s+)?(?:static\s+)?(?:void\s+)?{re.escape(method_name)}\s*\(([^)]*)\)',
+            rf'(?:public\s+|private\s+|protected\s+)?(?:static\s+)?(?:void\s+|boolean\s+)?{re.escape(method_name)}\s*\(([^)]*)\)',
             re.MULTILINE
         )
         

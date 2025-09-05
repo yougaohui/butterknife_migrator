@@ -18,8 +18,7 @@ public class TestOnLongClickActivity extends AppCompatActivity {
         // 点击事件
         textView.setText("Button clicked!");
     }
-    @OnLongClick(R.id.text_view)
-    public boolean onTextViewLongClick(View view) {
+public boolean onTextViewLongClick(View view) {
         // 长按事件
         textView.setText("TextView long clicked!");
         return true;
