@@ -56,12 +56,12 @@ class CodeInjector:
             print("DEBUG: 检测到继承自NewBaseActivity或NewBaseFragment，使用定制化处理")
             code = self._inject_for_newbase_activity(code, parsed_data)
         else:
-            # 获取需要注入的代码
-            injection_code = self._generate_injection_code(parsed_data)
-            
+        # 获取需要注入的代码
+        injection_code = self._generate_injection_code(parsed_data)
+        
             if injection_code:
-                # 只在onCreate方法中注入代码，不创建新方法
-                code = self._inject_in_oncreate_only(code, injection_code)
+        # 只在onCreate方法中注入代码，不创建新方法
+        code = self._inject_in_oncreate_only(code, injection_code)
         
         # 处理内部类中的@BindView注解（在所有情况下都要处理）
         code = self._inject_inner_classes(code, parsed_data)
@@ -557,7 +557,7 @@ class CodeInjector:
         return bool(re.search(pattern, code))
     
     def _update_method(self, code: str, method_name: str, new_content: str) -> str:
-        """更新现有方法的内容"""
+        """更新现有方法的内容 - 在现有代码末尾追加"""
         lines = code.split('\n')
         method_start = -1
         method_end = -1
@@ -569,6 +569,10 @@ class CodeInjector:
             if re.search(rf'(public|protected|private)\s+.*\s+{re.escape(method_name)}\s*\(', line):
                 method_start = i
                 in_method = True
+                # 开始计算大括号
+                for char in line:
+                    if char == '{':
+                        brace_count += 1
                 continue
             
             if in_method:
@@ -586,8 +590,15 @@ class CodeInjector:
                     break
         
         if method_start != -1 and method_end != -1:
-            # 替换方法内容
-            new_lines = lines[:method_start + 1] + [new_content] + lines[method_end:]
+            # 在方法结束前（最后一个}之前）追加新内容
+            # 检查是否已经有ButterKnife迁移的注释，避免重复添加
+            existing_content = '\n'.join(lines[method_start + 1:method_end])
+            if "// 初始化View绑定 - 替换@BindView注解" in existing_content or "// 初始化点击事件 - 替换@OnClick注解" in existing_content:
+                print(f"DEBUG: {method_name}方法中已存在ButterKnife迁移代码，跳过追加")
+                return code
+            
+            # 在方法结束前追加新内容，保持原有代码
+            new_lines = lines[:method_end] + [new_content] + lines[method_end:]
             return '\n'.join(new_lines)
         
         return code
@@ -668,13 +679,31 @@ class CodeInjector:
         
         # 检查onCreate方法中是否已经存在调用
         onCreate_content = code[start_pos:end_pos]
-        if 'initViews();' in onCreate_content and 'initListener();' in onCreate_content:
+        # 更精确的检查：确保initViews()和initListener()都在onCreate方法中
+        has_initviews = 'initViews();' in onCreate_content
+        has_initlistener = 'initListener();' in onCreate_content
+        if has_initviews and has_initlistener:
             print("DEBUG: onCreate方法中initViews和initListener调用已存在，跳过注入")
             return code
         
         # 在onCreate方法中添加调用
-        method_calls = "\n        initViews();\n        initListener();"
-        return code[:end_pos] + method_calls + code[end_pos:]
+        if has_initviews and not has_initlistener:
+            # 只有initViews()，添加initListener()
+            method_calls = "\n        initListener();"
+        elif not has_initviews and has_initlistener:
+            # 只有initListener()，添加initViews()
+            method_calls = "\n        initViews();"
+        elif not has_initviews and not has_initlistener:
+            # 都没有，添加两个
+            method_calls = "\n        initViews();\n        initListener();"
+        else:
+            # 都有，不需要添加
+            method_calls = ""
+        
+        if method_calls:
+            return code[:end_pos] + method_calls + code[end_pos:]
+        else:
+            return code
     
     def _inject_inner_classes(self, code: str, parsed_data: Dict[str, Any]) -> str:
         """处理内部类中的@BindView注解"""
