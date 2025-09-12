@@ -2285,3 +2285,748 @@
 [2025-09-05 15:15:32] [INFO] 步骤6: 生成迁移报告...
 [2025-09-05 15:15:32] [INFO] 迁移报告已保存到: C:\Users\ygh\PythonWorkSpace\butterknife_migrator\butterknife_migration_report.json
 [2025-09-05 15:15:32] [INFO] ButterKnife迁移流程完成!
+[2025-09-05 15:16:37] [INFO] 开始ButterKnife迁移流程...
+[2025-09-05 15:16:37] [INFO] 步骤1: 扫描项目文件...
+[2025-09-05 15:16:37] [INFO] 找到 5 个Java文件
+[2025-09-05 15:16:37] [INFO] 步骤2: 解析ButterKnife注解...
+[2025-09-05 15:16:37] [INFO] 解析文件: AboutActivity.java
+[2025-09-05 15:16:37] [INFO] 解析文件: DfuActivity.java
+[2025-09-05 15:16:37] [INFO] 解析文件: TestActivityWithExistingInitViews.java
+[2025-09-05 15:16:37] [INFO] 解析文件: TestOnLongClickActivity.java
+[2025-09-05 15:16:37] [INFO] 解析文件: WatchTheme2DetailsActivity.java
+[2025-09-05 15:16:37] [INFO] 找到 5 个包含ButterKnife的文件
+[2025-09-05 15:16:37] [INFO] 步骤3: 转换代码...
+[2025-09-05 15:16:37] [INFO] 步骤4: 注入初始化代码...
+[2025-09-05 15:16:37] [INFO] 步骤5: 写入转换后的文件...
+[2025-09-05 15:16:37] [INFO] 成功迁移文件: AboutActivity.java
+[2025-09-05 15:16:37] [INFO] 成功迁移文件: DfuActivity.java
+[2025-09-05 15:16:37] [INFO] 成功迁移文件: TestActivityWithExistingInitViews.java
+[2025-09-05 15:16:37] [INFO] 成功迁移文件: TestOnLongClickActivity.java
+[2025-09-05 15:16:37] [INFO] 成功迁移文件: WatchTheme2DetailsActivity.java
+[2025-09-05 15:16:37] [INFO] 步骤6: 生成迁移报告...
+[2025-09-05 15:16:37] [INFO] 迁移报告已保存到: C:\Users\ygh\PythonWorkSpace\butterknife_migrator\butterknife_migration_report.json
+[2025-09-05 15:16:37] [INFO] ButterKnife迁移流程完成!
+[2025-09-05 15:20:12] [INFO] 开始ButterKnife迁移流程...
+[2025-09-05 15:20:12] [INFO] 步骤1: 扫描项目文件...
+[2025-09-05 15:20:12] [INFO] 找到 5 个Java文件
+[2025-09-05 15:20:12] [INFO] 步骤2: 解析ButterKnife注解...
+[2025-09-05 15:20:12] [INFO] 解析文件: AboutActivity.java
+[2025-09-05 15:20:12] [INFO] 解析文件: DfuActivity.java
+[2025-09-05 15:20:12] [INFO] 解析文件: TestActivityWithExistingInitViews.java
+[2025-09-05 15:20:12] [INFO] 解析文件: TestOnLongClickActivity.java
+[2025-09-05 15:20:12] [INFO] 解析文件: WatchTheme2DetailsActivity.java
+[2025-09-05 15:20:12] [INFO] 找到 5 个包含ButterKnife的文件
+[2025-09-05 15:20:12] [INFO] 步骤3: 转换代码...
+[2025-09-05 15:20:12] [INFO] 步骤4: 注入初始化代码...
+[2025-09-05 15:20:12] [INFO] 步骤5: 写入转换后的文件...
+[2025-09-05 15:20:12] [INFO] 成功迁移文件: AboutActivity.java
+[2025-09-05 15:20:12] [INFO] 成功迁移文件: DfuActivity.java
+[2025-09-05 15:20:12] [INFO] 成功迁移文件: TestActivityWithExistingInitViews.java
+[2025-09-05 15:20:12] [INFO] 成功迁移文件: TestOnLongClickActivity.java
+[2025-09-05 15:20:12] [INFO] 成功迁移文件: WatchTheme2DetailsActivity.java
+[2025-09-05 15:20:12] [INFO] 步骤6: 生成迁移报告...
+[2025-09-05 15:20:12] [INFO] 迁移报告已保存到: C:\Users\ygh\PythonWorkSpace\butterknife_migrator\butterknife_migration_report.json
+[2025-09-05 15:20:12] [INFO] ButterKnife迁移流程完成!
+[2025-09-05 16:11:03] [INFO] 开始ButterKnife迁移流程...
+[2025-09-05 16:11:03] [INFO] 步骤1: 扫描项目文件...
+[2025-09-05 16:11:03] [INFO] 找到 5 个Java文件
+[2025-09-05 16:11:03] [INFO] 步骤2: 解析ButterKnife注解...
+[2025-09-05 16:11:03] [INFO] 解析文件: AboutActivity.java
+[2025-09-05 16:11:03] [INFO] 解析文件: DfuAppActivity.java
+[2025-09-05 16:11:03] [INFO] 解析文件: TestActivityWithExistingInitViews.java
+[2025-09-05 16:11:03] [INFO] 解析文件: TestOnLongClickActivity.java
+[2025-09-05 16:11:03] [INFO] 解析文件: WatchTheme2DetailsActivity.java
+[2025-09-05 16:11:03] [INFO] 找到 5 个包含ButterKnife的文件
+[2025-09-05 16:11:03] [INFO] 步骤3: 转换代码...
+[2025-09-05 16:11:03] [INFO] 步骤4: 注入初始化代码...
+[2025-09-05 16:11:03] [INFO] 步骤5: 写入转换后的文件...
+[2025-09-05 16:11:03] [INFO] 成功迁移文件: AboutActivity.java
+[2025-09-05 16:11:03] [INFO] 成功迁移文件: DfuAppActivity.java
+[2025-09-05 16:11:03] [INFO] 成功迁移文件: TestActivityWithExistingInitViews.java
+[2025-09-05 16:11:03] [INFO] 成功迁移文件: TestOnLongClickActivity.java
+[2025-09-05 16:11:03] [INFO] 成功迁移文件: WatchTheme2DetailsActivity.java
+[2025-09-05 16:11:03] [INFO] 步骤6: 生成迁移报告...
+[2025-09-05 16:11:03] [INFO] 迁移报告已保存到: C:\Users\ygh\PythonWorkSpace\butterknife_migrator\butterknife_migration_report.json
+[2025-09-05 16:11:03] [INFO] ButterKnife迁移流程完成!
+[2025-09-05 16:14:08] [INFO] 开始ButterKnife迁移流程...
+[2025-09-05 16:14:08] [INFO] 步骤1: 扫描项目文件...
+[2025-09-05 16:14:08] [INFO] 找到 5 个Java文件
+[2025-09-05 16:14:08] [INFO] 步骤2: 解析ButterKnife注解...
+[2025-09-05 16:14:08] [INFO] 解析文件: AboutActivity.java
+[2025-09-05 16:14:08] [INFO] 解析文件: DfuAppActivity.java
+[2025-09-05 16:14:08] [INFO] 解析文件: TestActivityWithExistingInitViews.java
+[2025-09-05 16:14:08] [INFO] 解析文件: TestOnLongClickActivity.java
+[2025-09-05 16:14:08] [INFO] 解析文件: WatchTheme2DetailsActivity.java
+[2025-09-05 16:14:08] [INFO] 找到 5 个包含ButterKnife的文件
+[2025-09-05 16:14:08] [INFO] 步骤3: 转换代码...
+[2025-09-05 16:14:08] [INFO] 步骤4: 注入初始化代码...
+[2025-09-05 16:14:08] [INFO] 步骤5: 写入转换后的文件...
+[2025-09-05 16:14:08] [INFO] 成功迁移文件: AboutActivity.java
+[2025-09-05 16:14:08] [INFO] 成功迁移文件: DfuAppActivity.java
+[2025-09-05 16:14:08] [INFO] 成功迁移文件: TestActivityWithExistingInitViews.java
+[2025-09-05 16:14:08] [INFO] 成功迁移文件: TestOnLongClickActivity.java
+[2025-09-05 16:14:08] [INFO] 成功迁移文件: WatchTheme2DetailsActivity.java
+[2025-09-05 16:14:08] [INFO] 步骤6: 生成迁移报告...
+[2025-09-05 16:14:08] [INFO] 迁移报告已保存到: C:\Users\ygh\PythonWorkSpace\butterknife_migrator\butterknife_migration_report.json
+[2025-09-05 16:14:08] [INFO] ButterKnife迁移流程完成!
+[2025-09-05 16:41:42] [INFO] 开始ButterKnife迁移流程...
+[2025-09-05 16:41:42] [INFO] 步骤1: 扫描项目文件...
+[2025-09-05 16:41:42] [INFO] 找到 7 个Java文件
+[2025-09-05 16:41:42] [INFO] 步骤2: 解析ButterKnife注解...
+[2025-09-05 16:41:42] [INFO] 解析文件: AboutActivity.java
+[2025-09-05 16:41:42] [INFO] 解析文件: DeviceListAdapter.java
+[2025-09-05 16:41:42] [INFO] 解析文件: TestActivityWithExistingInitViews.java
+[2025-09-05 16:41:42] [INFO] 解析文件: TestBaseHolder.java
+[2025-09-05 16:41:42] [INFO] 解析文件: TestOnLongClickActivity.java
+[2025-09-05 16:41:42] [INFO] 解析文件: TestViewHolder.java
+[2025-09-05 16:41:42] [INFO] 解析文件: WatchTheme2DetailsActivity.java
+[2025-09-05 16:41:42] [INFO] 找到 7 个包含ButterKnife的文件
+[2025-09-05 16:41:42] [INFO] 步骤3: 转换代码...
+[2025-09-05 16:41:42] [INFO] 步骤4: 注入初始化代码...
+[2025-09-05 16:41:42] [INFO] 步骤5: 写入转换后的文件...
+[2025-09-05 16:41:42] [INFO] 成功迁移文件: AboutActivity.java
+[2025-09-05 16:41:42] [INFO] 成功迁移文件: DeviceListAdapter.java
+[2025-09-05 16:41:42] [INFO] 成功迁移文件: TestActivityWithExistingInitViews.java
+[2025-09-05 16:41:42] [INFO] 成功迁移文件: TestBaseHolder.java
+[2025-09-05 16:41:42] [INFO] 成功迁移文件: TestOnLongClickActivity.java
+[2025-09-05 16:41:42] [INFO] 成功迁移文件: TestViewHolder.java
+[2025-09-05 16:41:42] [INFO] 成功迁移文件: WatchTheme2DetailsActivity.java
+[2025-09-05 16:41:42] [INFO] 步骤6: 生成迁移报告...
+[2025-09-05 16:41:42] [INFO] 迁移报告已保存到: C:\Users\ygh\PythonWorkSpace\butterknife_migrator\butterknife_migration_report.json
+[2025-09-05 16:41:42] [INFO] ButterKnife迁移流程完成!
+[2025-09-05 16:52:55] [INFO] 开始ButterKnife迁移流程...
+[2025-09-05 16:52:55] [INFO] 步骤1: 扫描项目文件...
+[2025-09-05 16:52:55] [INFO] 找到 8 个Java文件
+[2025-09-05 16:52:55] [INFO] 步骤2: 解析ButterKnife注解...
+[2025-09-05 16:52:55] [INFO] 解析文件: AboutActivity.java
+[2025-09-05 16:52:55] [INFO] 解析文件: DeviceListAdapter.java
+[2025-09-05 16:52:55] [INFO] 解析文件: TestActivityWithExistingInitViews.java
+[2025-09-05 16:52:55] [INFO] 解析文件: TestBaseHolder.java
+[2025-09-05 16:52:55] [INFO] 解析文件: TestOnLongClickActivity.java
+[2025-09-05 16:52:55] [INFO] 解析文件: TestViewHolder.java
+[2025-09-05 16:52:55] [INFO] 解析文件: TestViewHolderWithLongClick.java
+[2025-09-05 16:52:55] [INFO] 解析文件: WatchTheme2DetailsActivity.java
+[2025-09-05 16:52:55] [INFO] 找到 8 个包含ButterKnife的文件
+[2025-09-05 16:52:55] [INFO] 步骤3: 转换代码...
+[2025-09-05 16:52:55] [INFO] 步骤4: 注入初始化代码...
+[2025-09-05 16:52:55] [INFO] 步骤5: 写入转换后的文件...
+[2025-09-05 16:52:55] [INFO] 成功迁移文件: AboutActivity.java
+[2025-09-05 16:52:55] [INFO] 成功迁移文件: DeviceListAdapter.java
+[2025-09-05 16:52:55] [INFO] 成功迁移文件: TestActivityWithExistingInitViews.java
+[2025-09-05 16:52:55] [INFO] 成功迁移文件: TestBaseHolder.java
+[2025-09-05 16:52:55] [INFO] 成功迁移文件: TestOnLongClickActivity.java
+[2025-09-05 16:52:55] [INFO] 成功迁移文件: TestViewHolder.java
+[2025-09-05 16:52:55] [INFO] 成功迁移文件: TestViewHolderWithLongClick.java
+[2025-09-05 16:52:55] [INFO] 成功迁移文件: WatchTheme2DetailsActivity.java
+[2025-09-05 16:52:55] [INFO] 步骤6: 生成迁移报告...
+[2025-09-05 16:52:55] [INFO] 迁移报告已保存到: C:\Users\ygh\PythonWorkSpace\butterknife_migrator\butterknife_migration_report.json
+[2025-09-05 16:52:55] [INFO] ButterKnife迁移流程完成!
+[2025-09-05 16:54:10] [INFO] 开始ButterKnife迁移流程...
+[2025-09-05 16:54:10] [INFO] 步骤1: 扫描项目文件...
+[2025-09-05 16:54:10] [INFO] 找到 8 个Java文件
+[2025-09-05 16:54:10] [INFO] 步骤2: 解析ButterKnife注解...
+[2025-09-05 16:54:10] [INFO] 解析文件: AboutActivity.java
+[2025-09-05 16:54:10] [INFO] 解析文件: TestActivityWithExistingInitViews.java
+[2025-09-05 16:54:10] [INFO] 解析文件: TestBaseHolder.java
+[2025-09-05 16:54:10] [INFO] 解析文件: TestOnLongClickActivity.java
+[2025-09-05 16:54:10] [INFO] 解析文件: TestViewHolder.java
+[2025-09-05 16:54:10] [INFO] 解析文件: TestViewHolderWithLongClick.java
+[2025-09-05 16:54:10] [INFO] 解析文件: WatchTheme2DetailsActivity.java
+[2025-09-05 16:54:10] [INFO] 找到 7 个包含ButterKnife的文件
+[2025-09-05 16:54:10] [INFO] 步骤3: 转换代码...
+[2025-09-05 16:54:10] [INFO] 步骤4: 注入初始化代码...
+[2025-09-05 16:54:10] [INFO] 步骤5: 写入转换后的文件...
+[2025-09-05 16:54:10] [INFO] 成功迁移文件: AboutActivity.java
+[2025-09-05 16:54:10] [INFO] 成功迁移文件: TestActivityWithExistingInitViews.java
+[2025-09-05 16:54:10] [INFO] 成功迁移文件: TestBaseHolder.java
+[2025-09-05 16:54:10] [INFO] 成功迁移文件: TestOnLongClickActivity.java
+[2025-09-05 16:54:10] [INFO] 成功迁移文件: TestViewHolder.java
+[2025-09-05 16:54:10] [INFO] 成功迁移文件: TestViewHolderWithLongClick.java
+[2025-09-05 16:54:10] [INFO] 成功迁移文件: WatchTheme2DetailsActivity.java
+[2025-09-05 16:54:10] [INFO] 步骤6: 生成迁移报告...
+[2025-09-05 16:54:10] [INFO] 迁移报告已保存到: C:\Users\ygh\PythonWorkSpace\butterknife_migrator\butterknife_migration_report.json
+[2025-09-05 16:54:10] [INFO] ButterKnife迁移流程完成!
+[2025-09-05 16:54:39] [INFO] 开始ButterKnife迁移流程...
+[2025-09-05 16:54:39] [INFO] 步骤1: 扫描项目文件...
+[2025-09-05 16:54:39] [INFO] 找到 8 个Java文件
+[2025-09-05 16:54:39] [INFO] 步骤2: 解析ButterKnife注解...
+[2025-09-05 16:54:39] [INFO] 解析文件: AboutActivity.java
+[2025-09-05 16:54:39] [INFO] 解析文件: TestActivityWithExistingInitViews.java
+[2025-09-05 16:54:39] [INFO] 解析文件: TestBaseHolder.java
+[2025-09-05 16:54:39] [INFO] 解析文件: TestOnLongClickActivity.java
+[2025-09-05 16:54:39] [INFO] 解析文件: TestViewHolder.java
+[2025-09-05 16:54:39] [INFO] 解析文件: TestViewHolderWithLongClick.java
+[2025-09-05 16:54:39] [INFO] 解析文件: WatchTheme2DetailsActivity.java
+[2025-09-05 16:54:39] [INFO] 找到 7 个包含ButterKnife的文件
+[2025-09-05 16:54:39] [INFO] 步骤3: 转换代码...
+[2025-09-05 16:54:39] [INFO] 步骤4: 注入初始化代码...
+[2025-09-05 16:54:39] [INFO] 步骤5: 写入转换后的文件...
+[2025-09-05 16:54:39] [INFO] 成功迁移文件: AboutActivity.java
+[2025-09-05 16:54:39] [INFO] 成功迁移文件: TestActivityWithExistingInitViews.java
+[2025-09-05 16:54:39] [INFO] 成功迁移文件: TestBaseHolder.java
+[2025-09-05 16:54:39] [INFO] 成功迁移文件: TestOnLongClickActivity.java
+[2025-09-05 16:54:39] [INFO] 成功迁移文件: TestViewHolder.java
+[2025-09-05 16:54:39] [INFO] 成功迁移文件: TestViewHolderWithLongClick.java
+[2025-09-05 16:54:39] [INFO] 成功迁移文件: WatchTheme2DetailsActivity.java
+[2025-09-05 16:54:39] [INFO] 步骤6: 生成迁移报告...
+[2025-09-05 16:54:39] [INFO] 迁移报告已保存到: C:\Users\ygh\PythonWorkSpace\butterknife_migrator\butterknife_migration_report.json
+[2025-09-05 16:54:39] [INFO] ButterKnife迁移流程完成!
+[2025-09-05 16:55:00] [INFO] 开始ButterKnife迁移流程...
+[2025-09-05 16:55:00] [INFO] 步骤1: 扫描项目文件...
+[2025-09-05 16:55:00] [INFO] 找到 8 个Java文件
+[2025-09-05 16:55:00] [INFO] 步骤2: 解析ButterKnife注解...
+[2025-09-05 16:55:00] [INFO] 解析文件: AboutActivity.java
+[2025-09-05 16:55:00] [INFO] 解析文件: TestActivityWithExistingInitViews.java
+[2025-09-05 16:55:00] [INFO] 解析文件: TestBaseHolder.java
+[2025-09-05 16:55:00] [INFO] 解析文件: TestOnLongClickActivity.java
+[2025-09-05 16:55:00] [INFO] 解析文件: TestViewHolder.java
+[2025-09-05 16:55:00] [INFO] 解析文件: TestViewHolderWithLongClick.java
+[2025-09-05 16:55:00] [INFO] 解析文件: WatchTheme2DetailsActivity.java
+[2025-09-05 16:55:00] [INFO] 找到 7 个包含ButterKnife的文件
+[2025-09-05 16:55:00] [INFO] 步骤3: 转换代码...
+[2025-09-05 16:55:00] [INFO] 步骤4: 注入初始化代码...
+[2025-09-05 16:55:00] [INFO] 步骤5: 写入转换后的文件...
+[2025-09-05 16:55:00] [INFO] 成功迁移文件: AboutActivity.java
+[2025-09-05 16:55:00] [INFO] 成功迁移文件: TestActivityWithExistingInitViews.java
+[2025-09-05 16:55:00] [INFO] 成功迁移文件: TestBaseHolder.java
+[2025-09-05 16:55:00] [INFO] 成功迁移文件: TestOnLongClickActivity.java
+[2025-09-05 16:55:00] [INFO] 成功迁移文件: TestViewHolder.java
+[2025-09-05 16:55:00] [INFO] 成功迁移文件: TestViewHolderWithLongClick.java
+[2025-09-05 16:55:00] [INFO] 成功迁移文件: WatchTheme2DetailsActivity.java
+[2025-09-05 16:55:00] [INFO] 步骤6: 生成迁移报告...
+[2025-09-05 16:55:00] [INFO] 迁移报告已保存到: C:\Users\ygh\PythonWorkSpace\butterknife_migrator\butterknife_migration_report.json
+[2025-09-05 16:55:00] [INFO] ButterKnife迁移流程完成!
+[2025-09-05 16:57:39] [INFO] 开始ButterKnife迁移流程...
+[2025-09-05 16:57:39] [INFO] 步骤1: 扫描项目文件...
+[2025-09-05 16:57:39] [INFO] 找到 8 个Java文件
+[2025-09-05 16:57:39] [INFO] 步骤2: 解析ButterKnife注解...
+[2025-09-05 16:57:39] [INFO] 解析文件: AboutActivity.java
+[2025-09-05 16:57:39] [INFO] 解析文件: DeviceListAdapter.java
+[2025-09-05 16:57:39] [INFO] 解析文件: TestActivityWithExistingInitViews.java
+[2025-09-05 16:57:39] [INFO] 解析文件: TestBaseHolder.java
+[2025-09-05 16:57:39] [INFO] 解析文件: TestOnLongClickActivity.java
+[2025-09-05 16:57:39] [INFO] 解析文件: TestViewHolder.java
+[2025-09-05 16:57:39] [INFO] 解析文件: TestViewHolderWithLongClick.java
+[2025-09-05 16:57:39] [INFO] 解析文件: WatchTheme2DetailsActivity.java
+[2025-09-05 16:57:39] [INFO] 找到 8 个包含ButterKnife的文件
+[2025-09-05 16:57:39] [INFO] 步骤3: 转换代码...
+[2025-09-05 16:57:39] [INFO] 步骤4: 注入初始化代码...
+[2025-09-05 16:57:39] [INFO] 步骤5: 写入转换后的文件...
+[2025-09-05 16:57:39] [INFO] 成功迁移文件: AboutActivity.java
+[2025-09-05 16:57:39] [INFO] 成功迁移文件: DeviceListAdapter.java
+[2025-09-05 16:57:39] [INFO] 成功迁移文件: TestActivityWithExistingInitViews.java
+[2025-09-05 16:57:39] [INFO] 成功迁移文件: TestBaseHolder.java
+[2025-09-05 16:57:39] [INFO] 成功迁移文件: TestOnLongClickActivity.java
+[2025-09-05 16:57:39] [INFO] 成功迁移文件: TestViewHolder.java
+[2025-09-05 16:57:39] [INFO] 成功迁移文件: TestViewHolderWithLongClick.java
+[2025-09-05 16:57:39] [INFO] 成功迁移文件: WatchTheme2DetailsActivity.java
+[2025-09-05 16:57:39] [INFO] 步骤6: 生成迁移报告...
+[2025-09-05 16:57:39] [INFO] 迁移报告已保存到: C:\Users\ygh\PythonWorkSpace\butterknife_migrator\butterknife_migration_report.json
+[2025-09-05 16:57:39] [INFO] ButterKnife迁移流程完成!
+[2025-09-05 16:58:44] [INFO] 开始ButterKnife迁移流程...
+[2025-09-05 16:58:44] [INFO] 步骤1: 扫描项目文件...
+[2025-09-05 16:58:44] [INFO] 找到 8 个Java文件
+[2025-09-05 16:58:44] [INFO] 步骤2: 解析ButterKnife注解...
+[2025-09-05 16:58:44] [INFO] 解析文件: AboutActivity.java
+[2025-09-05 16:58:44] [INFO] 解析文件: DeviceListAdapter.java
+[2025-09-05 16:58:44] [INFO] 解析文件: TestActivityWithExistingInitViews.java
+[2025-09-05 16:58:44] [INFO] 解析文件: TestBaseHolder.java
+[2025-09-05 16:58:44] [INFO] 解析文件: TestOnLongClickActivity.java
+[2025-09-05 16:58:44] [INFO] 解析文件: TestViewHolder.java
+[2025-09-05 16:58:44] [INFO] 解析文件: TestViewHolderWithLongClick.java
+[2025-09-05 16:58:44] [INFO] 解析文件: WatchTheme2DetailsActivity.java
+[2025-09-05 16:58:44] [INFO] 找到 8 个包含ButterKnife的文件
+[2025-09-05 16:58:44] [INFO] 步骤3: 转换代码...
+[2025-09-05 16:58:44] [INFO] 步骤4: 注入初始化代码...
+[2025-09-05 16:58:44] [INFO] 步骤5: 写入转换后的文件...
+[2025-09-05 16:58:44] [INFO] 成功迁移文件: AboutActivity.java
+[2025-09-05 16:58:44] [INFO] 成功迁移文件: DeviceListAdapter.java
+[2025-09-05 16:58:44] [INFO] 成功迁移文件: TestActivityWithExistingInitViews.java
+[2025-09-05 16:58:44] [INFO] 成功迁移文件: TestBaseHolder.java
+[2025-09-05 16:58:44] [INFO] 成功迁移文件: TestOnLongClickActivity.java
+[2025-09-05 16:58:44] [INFO] 成功迁移文件: TestViewHolder.java
+[2025-09-05 16:58:44] [INFO] 成功迁移文件: TestViewHolderWithLongClick.java
+[2025-09-05 16:58:44] [INFO] 成功迁移文件: WatchTheme2DetailsActivity.java
+[2025-09-05 16:58:44] [INFO] 步骤6: 生成迁移报告...
+[2025-09-05 16:58:44] [INFO] 迁移报告已保存到: C:\Users\ygh\PythonWorkSpace\butterknife_migrator\butterknife_migration_report.json
+[2025-09-05 16:58:44] [INFO] ButterKnife迁移流程完成!
+[2025-09-05 17:00:13] [INFO] 开始ButterKnife迁移流程...
+[2025-09-05 17:00:13] [INFO] 步骤1: 扫描项目文件...
+[2025-09-05 17:00:13] [INFO] 找到 8 个Java文件
+[2025-09-05 17:00:13] [INFO] 步骤2: 解析ButterKnife注解...
+[2025-09-05 17:00:13] [INFO] 解析文件: AboutActivity.java
+[2025-09-05 17:00:13] [INFO] 解析文件: DeviceListAdapter.java
+[2025-09-05 17:00:13] [INFO] 解析文件: TestActivityWithExistingInitViews.java
+[2025-09-05 17:00:13] [INFO] 解析文件: TestBaseHolder.java
+[2025-09-05 17:00:13] [INFO] 解析文件: TestOnLongClickActivity.java
+[2025-09-05 17:00:13] [INFO] 解析文件: TestViewHolder.java
+[2025-09-05 17:00:13] [INFO] 解析文件: TestViewHolderWithLongClick.java
+[2025-09-05 17:00:13] [INFO] 解析文件: WatchTheme2DetailsActivity.java
+[2025-09-05 17:00:13] [INFO] 找到 8 个包含ButterKnife的文件
+[2025-09-05 17:00:13] [INFO] 步骤3: 转换代码...
+[2025-09-05 17:00:13] [INFO] 步骤4: 注入初始化代码...
+[2025-09-05 17:00:13] [INFO] 步骤5: 写入转换后的文件...
+[2025-09-05 17:00:13] [INFO] 成功迁移文件: AboutActivity.java
+[2025-09-05 17:00:13] [INFO] 成功迁移文件: DeviceListAdapter.java
+[2025-09-05 17:00:13] [INFO] 成功迁移文件: TestActivityWithExistingInitViews.java
+[2025-09-05 17:00:13] [INFO] 成功迁移文件: TestBaseHolder.java
+[2025-09-05 17:00:13] [INFO] 成功迁移文件: TestOnLongClickActivity.java
+[2025-09-05 17:00:13] [INFO] 成功迁移文件: TestViewHolder.java
+[2025-09-05 17:00:13] [INFO] 成功迁移文件: TestViewHolderWithLongClick.java
+[2025-09-05 17:00:13] [INFO] 成功迁移文件: WatchTheme2DetailsActivity.java
+[2025-09-05 17:00:13] [INFO] 步骤6: 生成迁移报告...
+[2025-09-05 17:00:13] [INFO] 迁移报告已保存到: C:\Users\ygh\PythonWorkSpace\butterknife_migrator\butterknife_migration_report.json
+[2025-09-05 17:00:13] [INFO] ButterKnife迁移流程完成!
+[2025-09-05 17:00:34] [INFO] 开始ButterKnife迁移流程...
+[2025-09-05 17:00:34] [INFO] 步骤1: 扫描项目文件...
+[2025-09-05 17:00:34] [INFO] 找到 8 个Java文件
+[2025-09-05 17:00:34] [INFO] 步骤2: 解析ButterKnife注解...
+[2025-09-05 17:00:34] [INFO] 解析文件: AboutActivity.java
+[2025-09-05 17:00:34] [INFO] 解析文件: TestActivityWithExistingInitViews.java
+[2025-09-05 17:00:34] [INFO] 解析文件: TestBaseHolder.java
+[2025-09-05 17:00:34] [INFO] 解析文件: TestOnLongClickActivity.java
+[2025-09-05 17:00:34] [INFO] 解析文件: TestViewHolder.java
+[2025-09-05 17:00:34] [INFO] 解析文件: TestViewHolderWithLongClick.java
+[2025-09-05 17:00:34] [INFO] 解析文件: WatchTheme2DetailsActivity.java
+[2025-09-05 17:00:34] [INFO] 找到 7 个包含ButterKnife的文件
+[2025-09-05 17:00:34] [INFO] 步骤3: 转换代码...
+[2025-09-05 17:00:34] [INFO] 步骤4: 注入初始化代码...
+[2025-09-05 17:00:34] [INFO] 步骤5: 写入转换后的文件...
+[2025-09-05 17:00:34] [INFO] 成功迁移文件: AboutActivity.java
+[2025-09-05 17:00:34] [INFO] 成功迁移文件: TestActivityWithExistingInitViews.java
+[2025-09-05 17:00:34] [INFO] 成功迁移文件: TestBaseHolder.java
+[2025-09-05 17:00:34] [INFO] 成功迁移文件: TestOnLongClickActivity.java
+[2025-09-05 17:00:34] [INFO] 成功迁移文件: TestViewHolder.java
+[2025-09-05 17:00:34] [INFO] 成功迁移文件: TestViewHolderWithLongClick.java
+[2025-09-05 17:00:34] [INFO] 成功迁移文件: WatchTheme2DetailsActivity.java
+[2025-09-05 17:00:34] [INFO] 步骤6: 生成迁移报告...
+[2025-09-05 17:00:34] [INFO] 迁移报告已保存到: C:\Users\ygh\PythonWorkSpace\butterknife_migrator\butterknife_migration_report.json
+[2025-09-05 17:00:34] [INFO] ButterKnife迁移流程完成!
+[2025-09-05 17:01:28] [INFO] 开始ButterKnife迁移流程...
+[2025-09-05 17:01:28] [INFO] 步骤1: 扫描项目文件...
+[2025-09-05 17:01:28] [INFO] 找到 8 个Java文件
+[2025-09-05 17:01:28] [INFO] 步骤2: 解析ButterKnife注解...
+[2025-09-05 17:01:28] [INFO] 解析文件: AboutActivity.java
+[2025-09-05 17:01:28] [INFO] 解析文件: DeviceListAdapter.java
+[2025-09-05 17:01:28] [INFO] 解析文件: TestActivityWithExistingInitViews.java
+[2025-09-05 17:01:28] [INFO] 解析文件: TestBaseHolder.java
+[2025-09-05 17:01:28] [INFO] 解析文件: TestOnLongClickActivity.java
+[2025-09-05 17:01:28] [INFO] 解析文件: TestViewHolder.java
+[2025-09-05 17:01:28] [INFO] 解析文件: TestViewHolderWithLongClick.java
+[2025-09-05 17:01:28] [INFO] 解析文件: WatchTheme2DetailsActivity.java
+[2025-09-05 17:01:28] [INFO] 找到 8 个包含ButterKnife的文件
+[2025-09-05 17:01:28] [INFO] 步骤3: 转换代码...
+[2025-09-05 17:01:28] [INFO] 步骤4: 注入初始化代码...
+[2025-09-05 17:01:29] [INFO] 步骤5: 写入转换后的文件...
+[2025-09-05 17:01:29] [INFO] 成功迁移文件: AboutActivity.java
+[2025-09-05 17:01:29] [INFO] 成功迁移文件: DeviceListAdapter.java
+[2025-09-05 17:01:29] [INFO] 成功迁移文件: TestActivityWithExistingInitViews.java
+[2025-09-05 17:01:29] [INFO] 成功迁移文件: TestBaseHolder.java
+[2025-09-05 17:01:29] [INFO] 成功迁移文件: TestOnLongClickActivity.java
+[2025-09-05 17:01:29] [INFO] 成功迁移文件: TestViewHolder.java
+[2025-09-05 17:01:29] [INFO] 成功迁移文件: TestViewHolderWithLongClick.java
+[2025-09-05 17:01:29] [INFO] 成功迁移文件: WatchTheme2DetailsActivity.java
+[2025-09-05 17:01:29] [INFO] 步骤6: 生成迁移报告...
+[2025-09-05 17:01:29] [INFO] 迁移报告已保存到: C:\Users\ygh\PythonWorkSpace\butterknife_migrator\butterknife_migration_report.json
+[2025-09-05 17:01:29] [INFO] ButterKnife迁移流程完成!
+[2025-09-05 17:04:15] [INFO] 开始ButterKnife迁移流程...
+[2025-09-05 17:04:15] [INFO] 步骤1: 扫描项目文件...
+[2025-09-05 17:04:15] [INFO] 找到 8 个Java文件
+[2025-09-05 17:04:15] [INFO] 步骤2: 解析ButterKnife注解...
+[2025-09-05 17:04:15] [INFO] 解析文件: AboutActivity.java
+[2025-09-05 17:04:15] [INFO] 解析文件: DeviceListAdapter.java
+[2025-09-05 17:04:15] [INFO] 解析文件: TestActivityWithExistingInitViews.java
+[2025-09-05 17:04:15] [INFO] 解析文件: TestBaseHolder.java
+[2025-09-05 17:04:15] [INFO] 解析文件: TestOnLongClickActivity.java
+[2025-09-05 17:04:15] [INFO] 解析文件: TestViewHolder.java
+[2025-09-05 17:04:15] [INFO] 解析文件: TestViewHolderWithLongClick.java
+[2025-09-05 17:04:15] [INFO] 解析文件: WatchTheme2DetailsActivity.java
+[2025-09-05 17:04:15] [INFO] 找到 8 个包含ButterKnife的文件
+[2025-09-05 17:04:15] [INFO] 步骤3: 转换代码...
+[2025-09-05 17:04:15] [INFO] 步骤4: 注入初始化代码...
+[2025-09-05 17:04:15] [INFO] 步骤5: 写入转换后的文件...
+[2025-09-05 17:04:15] [INFO] 成功迁移文件: AboutActivity.java
+[2025-09-05 17:04:15] [INFO] 成功迁移文件: DeviceListAdapter.java
+[2025-09-05 17:04:15] [INFO] 成功迁移文件: TestActivityWithExistingInitViews.java
+[2025-09-05 17:04:15] [INFO] 成功迁移文件: TestBaseHolder.java
+[2025-09-05 17:04:15] [INFO] 成功迁移文件: TestOnLongClickActivity.java
+[2025-09-05 17:04:15] [INFO] 成功迁移文件: TestViewHolder.java
+[2025-09-05 17:04:15] [INFO] 成功迁移文件: TestViewHolderWithLongClick.java
+[2025-09-05 17:04:15] [INFO] 成功迁移文件: WatchTheme2DetailsActivity.java
+[2025-09-05 17:04:15] [INFO] 步骤6: 生成迁移报告...
+[2025-09-05 17:04:15] [INFO] 迁移报告已保存到: C:\Users\ygh\PythonWorkSpace\butterknife_migrator\butterknife_migration_report.json
+[2025-09-05 17:04:15] [INFO] ButterKnife迁移流程完成!
+[2025-09-05 17:05:29] [INFO] 开始ButterKnife迁移流程...
+[2025-09-05 17:05:29] [INFO] 步骤1: 扫描项目文件...
+[2025-09-05 17:05:29] [INFO] 找到 8 个Java文件
+[2025-09-05 17:05:29] [INFO] 步骤2: 解析ButterKnife注解...
+[2025-09-05 17:05:29] [INFO] 解析文件: AboutActivity.java
+[2025-09-05 17:05:29] [INFO] 解析文件: TestActivityWithExistingInitViews.java
+[2025-09-05 17:05:29] [INFO] 解析文件: TestBaseHolder.java
+[2025-09-05 17:05:30] [INFO] 解析文件: TestOnLongClickActivity.java
+[2025-09-05 17:05:30] [INFO] 解析文件: TestViewHolder.java
+[2025-09-05 17:05:30] [INFO] 解析文件: TestViewHolderWithLongClick.java
+[2025-09-05 17:05:30] [INFO] 解析文件: WatchTheme2DetailsActivity.java
+[2025-09-05 17:05:30] [INFO] 找到 7 个包含ButterKnife的文件
+[2025-09-05 17:05:30] [INFO] 步骤3: 转换代码...
+[2025-09-05 17:05:30] [INFO] 步骤4: 注入初始化代码...
+[2025-09-05 17:05:30] [INFO] 步骤5: 写入转换后的文件...
+[2025-09-05 17:05:31] [INFO] 成功迁移文件: AboutActivity.java
+[2025-09-05 17:05:31] [INFO] 成功迁移文件: TestActivityWithExistingInitViews.java
+[2025-09-05 17:05:31] [INFO] 成功迁移文件: TestBaseHolder.java
+[2025-09-05 17:05:31] [INFO] 成功迁移文件: TestOnLongClickActivity.java
+[2025-09-05 17:05:31] [INFO] 成功迁移文件: TestViewHolder.java
+[2025-09-05 17:05:31] [INFO] 成功迁移文件: TestViewHolderWithLongClick.java
+[2025-09-05 17:05:31] [INFO] 成功迁移文件: WatchTheme2DetailsActivity.java
+[2025-09-05 17:05:31] [INFO] 步骤6: 生成迁移报告...
+[2025-09-05 17:05:31] [INFO] 迁移报告已保存到: C:\Users\ygh\PythonWorkSpace\butterknife_migrator\butterknife_migration_report.json
+[2025-09-05 17:05:31] [INFO] ButterKnife迁移流程完成!
+[2025-09-05 17:13:07] [INFO] 开始ButterKnife迁移流程...
+[2025-09-05 17:13:07] [INFO] 步骤1: 扫描项目文件...
+[2025-09-05 17:13:07] [INFO] 找到 8 个Java文件
+[2025-09-05 17:13:07] [INFO] 步骤2: 解析ButterKnife注解...
+[2025-09-05 17:13:07] [INFO] 解析文件: AboutActivity.java
+[2025-09-05 17:13:07] [INFO] 解析文件: DeviceListAdapter.java
+[2025-09-05 17:13:07] [INFO] 解析文件: TestActivityWithExistingInitViews.java
+[2025-09-05 17:13:07] [INFO] 解析文件: TestBaseHolder.java
+[2025-09-05 17:13:07] [INFO] 解析文件: TestOnLongClickActivity.java
+[2025-09-05 17:13:07] [INFO] 解析文件: TestViewHolder.java
+[2025-09-05 17:13:07] [INFO] 解析文件: TestViewHolderWithLongClick.java
+[2025-09-05 17:13:07] [INFO] 解析文件: WatchTheme2DetailsActivity.java
+[2025-09-05 17:13:07] [INFO] 找到 8 个包含ButterKnife的文件
+[2025-09-05 17:13:07] [INFO] 步骤3: 转换代码...
+[2025-09-05 17:13:08] [INFO] 步骤4: 注入初始化代码...
+[2025-09-05 17:13:08] [INFO] 步骤5: 写入转换后的文件...
+[2025-09-05 17:13:08] [INFO] 成功迁移文件: AboutActivity.java
+[2025-09-05 17:13:08] [INFO] 成功迁移文件: DeviceListAdapter.java
+[2025-09-05 17:13:08] [INFO] 成功迁移文件: TestActivityWithExistingInitViews.java
+[2025-09-05 17:13:08] [INFO] 成功迁移文件: TestBaseHolder.java
+[2025-09-05 17:13:08] [INFO] 成功迁移文件: TestOnLongClickActivity.java
+[2025-09-05 17:13:08] [INFO] 成功迁移文件: TestViewHolder.java
+[2025-09-05 17:13:08] [INFO] 成功迁移文件: TestViewHolderWithLongClick.java
+[2025-09-05 17:13:08] [INFO] 成功迁移文件: WatchTheme2DetailsActivity.java
+[2025-09-05 17:13:08] [INFO] 步骤6: 生成迁移报告...
+[2025-09-05 17:13:08] [INFO] 迁移报告已保存到: C:\Users\ygh\PythonWorkSpace\butterknife_migrator\butterknife_migration_report.json
+[2025-09-05 17:13:08] [INFO] ButterKnife迁移流程完成!
+[2025-09-05 17:16:43] [INFO] 开始ButterKnife迁移流程...
+[2025-09-05 17:16:43] [INFO] 步骤1: 扫描项目文件...
+[2025-09-05 17:16:43] [INFO] 找到 8 个Java文件
+[2025-09-05 17:16:43] [INFO] 步骤2: 解析ButterKnife注解...
+[2025-09-05 17:16:43] [INFO] 解析文件: AboutActivity.java
+[2025-09-05 17:16:43] [INFO] 解析文件: TestActivityWithExistingInitViews.java
+[2025-09-05 17:16:43] [INFO] 解析文件: TestBaseHolder.java
+[2025-09-05 17:16:43] [INFO] 解析文件: TestOnLongClickActivity.java
+[2025-09-05 17:16:43] [INFO] 解析文件: TestViewHolder.java
+[2025-09-05 17:16:43] [INFO] 解析文件: TestViewHolderWithLongClick.java
+[2025-09-05 17:16:43] [INFO] 解析文件: WatchTheme2DetailsActivity.java
+[2025-09-05 17:16:43] [INFO] 找到 7 个包含ButterKnife的文件
+[2025-09-05 17:16:43] [INFO] 步骤3: 转换代码...
+[2025-09-05 17:16:43] [INFO] 步骤4: 注入初始化代码...
+[2025-09-05 17:16:43] [INFO] 步骤5: 写入转换后的文件...
+[2025-09-05 17:16:43] [INFO] 成功迁移文件: AboutActivity.java
+[2025-09-05 17:16:43] [INFO] 成功迁移文件: TestActivityWithExistingInitViews.java
+[2025-09-05 17:16:43] [INFO] 成功迁移文件: TestBaseHolder.java
+[2025-09-05 17:16:43] [INFO] 成功迁移文件: TestOnLongClickActivity.java
+[2025-09-05 17:16:43] [INFO] 成功迁移文件: TestViewHolder.java
+[2025-09-05 17:16:43] [INFO] 成功迁移文件: TestViewHolderWithLongClick.java
+[2025-09-05 17:16:43] [INFO] 成功迁移文件: WatchTheme2DetailsActivity.java
+[2025-09-05 17:16:43] [INFO] 步骤6: 生成迁移报告...
+[2025-09-05 17:16:43] [INFO] 迁移报告已保存到: C:\Users\ygh\PythonWorkSpace\butterknife_migrator\butterknife_migration_report.json
+[2025-09-05 17:16:43] [INFO] ButterKnife迁移流程完成!
+[2025-09-05 17:32:42] [INFO] 开始ButterKnife迁移流程...
+[2025-09-05 17:32:42] [INFO] 步骤1: 扫描项目文件...
+[2025-09-05 17:32:42] [INFO] 找到 8 个Java文件
+[2025-09-05 17:32:42] [INFO] 步骤2: 解析ButterKnife注解...
+[2025-09-05 17:32:42] [INFO] 解析文件: AboutActivity.java
+[2025-09-05 17:32:42] [INFO] 解析文件: DeviceListAdapter.java
+[2025-09-05 17:32:42] [INFO] 解析文件: TestActivityWithExistingInitViews.java
+[2025-09-05 17:32:42] [INFO] 解析文件: TestBaseHolder.java
+[2025-09-05 17:32:42] [INFO] 解析文件: TestOnLongClickActivity.java
+[2025-09-05 17:32:42] [INFO] 解析文件: TestViewHolder.java
+[2025-09-05 17:32:42] [INFO] 解析文件: TestViewHolderWithLongClick.java
+[2025-09-05 17:32:42] [INFO] 解析文件: WatchTheme2DetailsActivity.java
+[2025-09-05 17:32:42] [INFO] 找到 8 个包含ButterKnife的文件
+[2025-09-05 17:32:42] [INFO] 步骤3: 转换代码...
+[2025-09-05 17:32:42] [INFO] 步骤4: 注入初始化代码...
+[2025-09-05 17:32:42] [INFO] 步骤5: 写入转换后的文件...
+[2025-09-05 17:32:42] [INFO] 成功迁移文件: AboutActivity.java
+[2025-09-05 17:32:42] [INFO] 成功迁移文件: DeviceListAdapter.java
+[2025-09-05 17:32:42] [INFO] 成功迁移文件: TestActivityWithExistingInitViews.java
+[2025-09-05 17:32:42] [INFO] 成功迁移文件: TestBaseHolder.java
+[2025-09-05 17:32:42] [INFO] 成功迁移文件: TestOnLongClickActivity.java
+[2025-09-05 17:32:42] [INFO] 成功迁移文件: TestViewHolder.java
+[2025-09-05 17:32:42] [INFO] 成功迁移文件: TestViewHolderWithLongClick.java
+[2025-09-05 17:32:42] [INFO] 成功迁移文件: WatchTheme2DetailsActivity.java
+[2025-09-05 17:32:42] [INFO] 步骤6: 生成迁移报告...
+[2025-09-05 17:32:42] [INFO] 迁移报告已保存到: C:\Users\ygh\PythonWorkSpace\butterknife_migrator\butterknife_migration_report.json
+[2025-09-05 17:32:42] [INFO] ButterKnife迁移流程完成!
+[2025-09-05 17:52:37] [INFO] 开始ButterKnife迁移流程...
+[2025-09-05 17:52:37] [INFO] 步骤1: 扫描项目文件...
+[2025-09-05 17:52:37] [INFO] 找到 8 个Java文件
+[2025-09-05 17:52:37] [INFO] 步骤2: 解析ButterKnife注解...
+[2025-09-05 17:52:37] [INFO] 解析文件: AboutActivity.java
+[2025-09-05 17:52:37] [INFO] 解析文件: DeviceListAdapter.java
+[2025-09-05 17:52:37] [INFO] 解析文件: TestActivityWithExistingInitViews.java
+[2025-09-05 17:52:37] [INFO] 解析文件: TestBaseHolder.java
+[2025-09-05 17:52:37] [INFO] 解析文件: TestOnLongClickActivity.java
+[2025-09-05 17:52:37] [INFO] 解析文件: TestViewHolder.java
+[2025-09-05 17:52:37] [INFO] 解析文件: TestViewHolderWithLongClick.java
+[2025-09-05 17:52:37] [INFO] 解析文件: WatchTheme2DetailsActivity.java
+[2025-09-05 17:52:37] [INFO] 找到 8 个包含ButterKnife的文件
+[2025-09-05 17:52:37] [INFO] 步骤3: 转换代码...
+[2025-09-05 17:52:37] [INFO] 步骤4: 注入初始化代码...
+[2025-09-05 17:52:37] [INFO] 步骤5: 写入转换后的文件...
+[2025-09-05 17:52:37] [INFO] 成功迁移文件: AboutActivity.java
+[2025-09-05 17:52:37] [INFO] 成功迁移文件: DeviceListAdapter.java
+[2025-09-05 17:52:37] [INFO] 成功迁移文件: TestActivityWithExistingInitViews.java
+[2025-09-05 17:52:37] [INFO] 成功迁移文件: TestBaseHolder.java
+[2025-09-05 17:52:37] [INFO] 成功迁移文件: TestOnLongClickActivity.java
+[2025-09-05 17:52:37] [INFO] 成功迁移文件: TestViewHolder.java
+[2025-09-05 17:52:37] [INFO] 成功迁移文件: TestViewHolderWithLongClick.java
+[2025-09-05 17:52:37] [INFO] 成功迁移文件: WatchTheme2DetailsActivity.java
+[2025-09-05 17:52:37] [INFO] 步骤6: 生成迁移报告...
+[2025-09-05 17:52:37] [INFO] 迁移报告已保存到: C:\Users\ygh\PythonWorkSpace\butterknife_migrator\butterknife_migration_report.json
+[2025-09-05 17:52:37] [INFO] ButterKnife迁移流程完成!
+[2025-09-05 17:53:35] [INFO] 开始ButterKnife迁移流程...
+[2025-09-05 17:53:35] [INFO] 步骤1: 扫描项目文件...
+[2025-09-05 17:53:35] [INFO] 找到 8 个Java文件
+[2025-09-05 17:53:35] [INFO] 步骤2: 解析ButterKnife注解...
+[2025-09-05 17:53:35] [INFO] 解析文件: AboutActivity.java
+[2025-09-05 17:53:35] [INFO] 解析文件: DeviceListAdapter.java
+[2025-09-05 17:53:35] [INFO] 解析文件: TestActivityWithExistingInitViews.java
+[2025-09-05 17:53:35] [INFO] 解析文件: TestBaseHolder.java
+[2025-09-05 17:53:35] [INFO] 解析文件: TestOnLongClickActivity.java
+[2025-09-05 17:53:35] [INFO] 解析文件: TestViewHolder.java
+[2025-09-05 17:53:35] [INFO] 解析文件: TestViewHolderWithLongClick.java
+[2025-09-05 17:53:35] [INFO] 解析文件: WatchTheme2DetailsActivity.java
+[2025-09-05 17:53:35] [INFO] 找到 8 个包含ButterKnife的文件
+[2025-09-05 17:53:35] [INFO] 步骤3: 转换代码...
+[2025-09-05 17:53:35] [INFO] 步骤4: 注入初始化代码...
+[2025-09-05 17:53:35] [INFO] 步骤5: 写入转换后的文件...
+[2025-09-05 17:53:35] [INFO] 成功迁移文件: AboutActivity.java
+[2025-09-05 17:53:35] [INFO] 成功迁移文件: DeviceListAdapter.java
+[2025-09-05 17:53:35] [INFO] 成功迁移文件: TestActivityWithExistingInitViews.java
+[2025-09-05 17:53:35] [INFO] 成功迁移文件: TestBaseHolder.java
+[2025-09-05 17:53:35] [INFO] 成功迁移文件: TestOnLongClickActivity.java
+[2025-09-05 17:53:35] [INFO] 成功迁移文件: TestViewHolder.java
+[2025-09-05 17:53:35] [INFO] 成功迁移文件: TestViewHolderWithLongClick.java
+[2025-09-05 17:53:35] [INFO] 成功迁移文件: WatchTheme2DetailsActivity.java
+[2025-09-05 17:53:35] [INFO] 步骤6: 生成迁移报告...
+[2025-09-05 17:53:35] [INFO] 迁移报告已保存到: C:\Users\ygh\PythonWorkSpace\butterknife_migrator\butterknife_migration_report.json
+[2025-09-05 17:53:35] [INFO] ButterKnife迁移流程完成!
+[2025-09-06 09:32:02] [INFO] 开始ButterKnife迁移流程...
+[2025-09-06 09:32:02] [INFO] 步骤1: 扫描项目文件...
+[2025-09-06 09:32:02] [INFO] 找到 1 个Java文件
+[2025-09-06 09:32:02] [INFO] 步骤2: 解析ButterKnife注解...
+[2025-09-06 09:32:02] [INFO] 解析文件: DeviceListAdapter.java
+[2025-09-06 09:32:02] [INFO] 找到 1 个包含ButterKnife的文件
+[2025-09-06 09:32:02] [INFO] 步骤3: 转换代码...
+[2025-09-06 09:32:02] [INFO] 步骤4: 注入初始化代码...
+[2025-09-06 09:32:02] [INFO] 步骤5: 写入转换后的文件...
+[2025-09-06 09:32:02] [INFO] 成功迁移文件: DeviceListAdapter.java
+[2025-09-06 09:32:02] [INFO] 步骤6: 生成迁移报告...
+[2025-09-06 09:32:02] [INFO] 迁移报告已保存到: C:\Users\ygh\PythonWorkSpace\butterknife_migrator\butterknife_migration_report.json
+[2025-09-06 09:32:02] [INFO] ButterKnife迁移流程完成!
+[2025-09-11 17:23:04] [INFO] 检测到普通Java项目: C:\Users\ygh\PythonWorkSpace\butterknife_migrator
+[2025-09-11 17:23:04] [INFO] 发现源码目录: tests
+[2025-09-11 17:23:04] [INFO] 自动配置扫描目录: ['tests']
+[2025-09-11 17:44:16] [INFO] 检测到普通Java项目: C:\Users\ygh\PythonWorkSpace\butterknife_migrator
+[2025-09-11 17:44:16] [INFO] 发现源码目录: tests
+[2025-09-11 17:44:16] [INFO] 自动配置扫描目录: ['tests']
+[2025-09-11 17:49:16] [INFO] 检测到普通Java项目: C:\Users\ygh\PythonWorkSpace\butterknife_migrator
+[2025-09-11 17:49:16] [INFO] 发现源码目录: tests
+[2025-09-11 17:49:16] [INFO] 自动配置扫描目录: ['tests']
+[2025-09-11 17:59:58] [INFO] 检测到普通Java项目: C:\Users\ygh\PythonWorkSpace\butterknife_migrator
+[2025-09-11 17:59:58] [INFO] 发现源码目录: tests
+[2025-09-11 17:59:58] [INFO] 自动配置扫描目录: ['tests']
+[2025-09-12 09:27:37] [INFO] 检测到普通Java项目: C:\Users\ygh\PythonWorkSpace\butterknife_migrator
+[2025-09-12 09:27:37] [INFO] 发现源码目录: tests
+[2025-09-12 09:27:37] [INFO] 自动配置扫描目录: ['tests']
+[2025-09-12 09:30:21] [INFO] 检测到普通Java项目: C:\Users\ygh\PythonWorkSpace\butterknife_migrator
+[2025-09-12 09:30:21] [INFO] 发现源码目录: tests
+[2025-09-12 09:30:21] [INFO] 自动配置扫描目录: ['tests']
+[2025-09-12 09:35:48] [INFO] 检测到普通Java项目: C:\Users\ygh\PythonWorkSpace\butterknife_migrator
+[2025-09-12 09:35:48] [INFO] 发现源码目录: tests
+[2025-09-12 09:35:48] [INFO] 自动配置扫描目录: ['tests']
+[2025-09-12 09:36:03] [INFO] 检测到普通Java项目: C:\Users\ygh\PythonWorkSpace\butterknife_migrator
+[2025-09-12 09:36:03] [INFO] 发现源码目录: tests
+[2025-09-12 09:36:03] [INFO] 自动配置扫描目录: ['tests']
+[2025-09-12 09:38:05] [INFO] 检测到普通Java项目: C:\Users\ygh\PythonWorkSpace\butterknife_migrator
+[2025-09-12 09:38:05] [INFO] 发现源码目录: tests
+[2025-09-12 09:38:05] [INFO] 自动配置扫描目录: ['tests']
+[2025-09-12 09:38:32] [INFO] 检测到普通Java项目: C:\Users\ygh\PythonWorkSpace\butterknife_migrator
+[2025-09-12 09:38:32] [INFO] 发现源码目录: tests
+[2025-09-12 09:38:32] [INFO] 自动配置扫描目录: ['tests']
+[2025-09-12 09:42:41] [INFO] 检测到普通Java项目: C:\Users\ygh\PythonWorkSpace\butterknife_migrator
+[2025-09-12 09:42:41] [INFO] 发现源码目录: tests
+[2025-09-12 09:42:41] [INFO] 自动配置扫描目录: ['tests']
+[2025-09-12 09:43:00] [INFO] 检测到普通Java项目: C:\Users\ygh\PythonWorkSpace\butterknife_migrator
+[2025-09-12 09:43:00] [INFO] 发现源码目录: tests
+[2025-09-12 09:43:00] [INFO] 自动配置扫描目录: ['tests']
+[2025-09-12 09:44:28] [INFO] 检测到普通Java项目: C:\Users\ygh\PythonWorkSpace\butterknife_migrator
+[2025-09-12 09:44:28] [INFO] 发现源码目录: tests
+[2025-09-12 09:44:28] [INFO] 自动配置扫描目录: ['tests']
+[2025-09-12 09:44:43] [INFO] 检测到普通Java项目: C:\Users\ygh\PythonWorkSpace\butterknife_migrator
+[2025-09-12 09:44:43] [INFO] 发现源码目录: tests
+[2025-09-12 09:44:43] [INFO] 自动配置扫描目录: ['tests']
+[2025-09-12 09:45:11] [INFO] 检测到普通Java项目: C:\Users\ygh\PythonWorkSpace\butterknife_migrator
+[2025-09-12 09:45:11] [INFO] 发现源码目录: tests
+[2025-09-12 09:45:11] [INFO] 自动配置扫描目录: ['tests']
+[2025-09-12 09:47:31] [INFO] 检测到普通Java项目: C:\Users\ygh\PythonWorkSpace\butterknife_migrator
+[2025-09-12 09:47:31] [INFO] 发现源码目录: tests
+[2025-09-12 09:47:31] [INFO] 自动配置扫描目录: ['tests']
+[2025-09-12 09:48:08] [INFO] 检测到普通Java项目: C:\Users\ygh\PythonWorkSpace\butterknife_migrator
+[2025-09-12 09:48:08] [INFO] 发现源码目录: tests
+[2025-09-12 09:48:08] [INFO] 自动配置扫描目录: ['tests']
+[2025-09-12 09:49:26] [INFO] 检测到普通Java项目: C:\Users\ygh\PythonWorkSpace\butterknife_migrator
+[2025-09-12 09:49:26] [INFO] 发现源码目录: tests
+[2025-09-12 09:49:26] [INFO] 自动配置扫描目录: ['tests']
+[2025-09-12 10:08:32] [INFO] 检测到普通Java项目: C:\Users\ygh\PythonWorkSpace\butterknife_migrator
+[2025-09-12 10:08:32] [INFO] 发现源码目录: tests
+[2025-09-12 10:08:32] [INFO] 自动配置扫描目录: ['tests']
+[2025-09-12 10:15:36] [INFO] 检测到普通Java项目: C:\Users\ygh\PythonWorkSpace\butterknife_migrator
+[2025-09-12 10:15:36] [INFO] 发现源码目录: tests
+[2025-09-12 10:15:36] [INFO] 自动配置扫描目录: ['tests']
+[2025-09-12 10:18:58] [INFO] 检测到普通Java项目: C:\Users\ygh\PythonWorkSpace\butterknife_migrator
+[2025-09-12 10:18:58] [INFO] 发现源码目录: tests
+[2025-09-12 10:18:58] [INFO] 自动配置扫描目录: ['tests']
+[2025-09-12 10:22:33] [INFO] 检测到普通Java项目: C:\Users\ygh\PythonWorkSpace\butterknife_migrator
+[2025-09-12 10:22:33] [INFO] 发现源码目录: tests
+[2025-09-12 10:22:33] [INFO] 自动配置扫描目录: ['tests']
+[2025-09-12 10:23:20] [INFO] 检测到普通Java项目: C:\Users\ygh\PythonWorkSpace\butterknife_migrator
+[2025-09-12 10:23:20] [INFO] 发现源码目录: tests
+[2025-09-12 10:23:20] [INFO] 自动配置扫描目录: ['tests']
+[2025-09-12 10:23:57] [INFO] 检测到普通Java项目: C:\Users\ygh\PythonWorkSpace\butterknife_migrator
+[2025-09-12 10:23:57] [INFO] 发现源码目录: tests
+[2025-09-12 10:23:57] [INFO] 自动配置扫描目录: ['tests']
+[2025-09-12 10:28:32] [INFO] 检测到普通Java项目: C:\Users\ygh\PythonWorkSpace\butterknife_migrator
+[2025-09-12 10:28:32] [INFO] 发现源码目录: tests
+[2025-09-12 10:28:32] [INFO] 自动配置扫描目录: ['tests']
+[2025-09-12 10:30:43] [INFO] 检测到普通Java项目: C:\Users\ygh\PythonWorkSpace\butterknife_migrator
+[2025-09-12 10:30:43] [INFO] 发现源码目录: tests
+[2025-09-12 10:30:43] [INFO] 自动配置扫描目录: ['tests']
+[2025-09-12 10:35:03] [INFO] 检测到普通Java项目: C:\Users\ygh\PythonWorkSpace\butterknife_migrator
+[2025-09-12 10:35:03] [INFO] 发现源码目录: tests
+[2025-09-12 10:35:03] [INFO] 自动配置扫描目录: ['tests']
+[2025-09-12 10:39:24] [INFO] 检测到普通Java项目: C:\Users\ygh\PythonWorkSpace\butterknife_migrator
+[2025-09-12 10:39:24] [INFO] 发现源码目录: tests
+[2025-09-12 10:39:24] [INFO] 自动配置扫描目录: ['tests']
+[2025-09-12 10:43:19] [INFO] 检测到普通Java项目: C:\Users\ygh\PythonWorkSpace\butterknife_migrator
+[2025-09-12 10:43:19] [INFO] 发现源码目录: tests
+[2025-09-12 10:43:19] [INFO] 自动配置扫描目录: ['tests']
+[2025-09-12 10:44:53] [INFO] 开始ButterKnife迁移流程...
+[2025-09-12 10:44:53] [INFO] 步骤1: 扫描项目文件...
+[2025-09-12 10:44:53] [INFO] 找到 1 个Java文件
+[2025-09-12 10:44:53] [INFO] 步骤2: 解析ButterKnife注解...
+[2025-09-12 10:44:54] [INFO] 解析文件: Agent_DeviceListActivity.java
+[2025-09-12 10:44:54] [INFO] 找到 1 个包含ButterKnife的文件
+[2025-09-12 10:44:54] [INFO] 步骤3: 转换代码...
+[2025-09-12 10:44:54] [INFO] 步骤4: 注入初始化代码...
+[2025-09-12 10:44:54] [INFO] 步骤5: 写入转换后的文件...
+[2025-09-12 10:44:54] [INFO] 成功迁移文件: Agent_DeviceListActivity.java
+[2025-09-12 10:44:54] [INFO] 步骤6: 生成迁移报告...
+[2025-09-12 10:44:54] [INFO] 迁移报告已保存到: C:\Users\ygh\PythonWorkSpace\butterknife_migrator\butterknife_migration_report.json
+[2025-09-12 10:44:54] [INFO] ButterKnife迁移流程完成!
+[2025-09-12 10:52:58] [INFO] 开始ButterKnife迁移流程...
+[2025-09-12 10:52:58] [INFO] 步骤1: 扫描项目文件...
+[2025-09-12 10:52:58] [INFO] 找到 1 个Java文件
+[2025-09-12 10:52:58] [INFO] 步骤2: 解析ButterKnife注解...
+[2025-09-12 10:52:58] [INFO] 解析文件: Agent_DeviceListActivity.java
+[2025-09-12 10:52:58] [INFO] 找到 1 个包含ButterKnife的文件
+[2025-09-12 10:52:58] [INFO] 步骤3: 转换代码...
+[2025-09-12 10:52:58] [INFO] 步骤4: 注入初始化代码...
+[2025-09-12 10:52:58] [INFO] 步骤5: 写入转换后的文件...
+[2025-09-12 10:52:58] [INFO] 成功迁移文件: Agent_DeviceListActivity.java
+[2025-09-12 10:52:58] [INFO] 步骤6: 生成迁移报告...
+[2025-09-12 10:52:58] [INFO] 迁移报告已保存到: C:\Users\ygh\PythonWorkSpace\butterknife_migrator\butterknife_migration_report.json
+[2025-09-12 10:52:58] [INFO] ButterKnife迁移流程完成!
+[2025-09-12 10:53:17] [INFO] 开始ButterKnife迁移流程...
+[2025-09-12 10:53:17] [INFO] 步骤1: 扫描项目文件...
+[2025-09-12 10:53:17] [INFO] 找到 1 个Java文件
+[2025-09-12 10:53:17] [INFO] 步骤2: 解析ButterKnife注解...
+[2025-09-12 10:53:17] [INFO] 解析文件: Agent_DeviceListActivity.java
+[2025-09-12 10:53:17] [INFO] 找到 1 个包含ButterKnife的文件
+[2025-09-12 10:53:17] [INFO] 步骤3: 转换代码...
+[2025-09-12 10:53:17] [INFO] 步骤4: 注入初始化代码...
+[2025-09-12 10:53:17] [INFO] 步骤5: 写入转换后的文件...
+[2025-09-12 10:53:17] [INFO] 成功迁移文件: Agent_DeviceListActivity.java
+[2025-09-12 10:53:17] [INFO] 步骤6: 生成迁移报告...
+[2025-09-12 10:53:17] [INFO] 迁移报告已保存到: C:\Users\ygh\PythonWorkSpace\butterknife_migrator\butterknife_migration_report.json
+[2025-09-12 10:53:17] [INFO] ButterKnife迁移流程完成!
+[2025-09-12 10:53:43] [INFO] 开始ButterKnife迁移流程...
+[2025-09-12 10:53:43] [INFO] 步骤1: 扫描项目文件...
+[2025-09-12 10:53:43] [INFO] 找到 1 个Java文件
+[2025-09-12 10:53:43] [INFO] 步骤2: 解析ButterKnife注解...
+[2025-09-12 10:53:43] [INFO] 解析文件: Agent_DeviceListActivity.java
+[2025-09-12 10:53:43] [INFO] 找到 1 个包含ButterKnife的文件
+[2025-09-12 10:53:43] [INFO] 步骤3: 转换代码...
+[2025-09-12 10:53:43] [INFO] 步骤4: 注入初始化代码...
+[2025-09-12 10:53:43] [INFO] 步骤5: 写入转换后的文件...
+[2025-09-12 10:53:43] [INFO] 成功迁移文件: Agent_DeviceListActivity.java
+[2025-09-12 10:53:43] [INFO] 步骤6: 生成迁移报告...
+[2025-09-12 10:53:43] [INFO] 迁移报告已保存到: C:\Users\ygh\PythonWorkSpace\butterknife_migrator\butterknife_migration_report.json
+[2025-09-12 10:53:43] [INFO] ButterKnife迁移流程完成!
+[2025-09-12 10:55:16] [INFO] 检测到普通Java项目: C:\Users\ygh\PythonWorkSpace\butterknife_migrator
+[2025-09-12 10:55:16] [INFO] 发现源码目录: tests
+[2025-09-12 10:55:16] [INFO] 自动配置扫描目录: ['tests']
+[2025-09-12 10:57:06] [INFO] 开始ButterKnife迁移流程...
+[2025-09-12 10:57:06] [INFO] 步骤1: 扫描项目文件...
+[2025-09-12 10:57:06] [INFO] 找到 1 个Java文件
+[2025-09-12 10:57:06] [INFO] 步骤2: 解析ButterKnife注解...
+[2025-09-12 10:57:06] [INFO] 解析文件: Agent_DeviceListActivity.java
+[2025-09-12 10:57:06] [INFO] 找到 1 个包含ButterKnife的文件
+[2025-09-12 10:57:06] [INFO] 步骤3: 转换代码...
+[2025-09-12 10:57:06] [INFO] 步骤4: 注入初始化代码...
+[2025-09-12 10:57:06] [INFO] 步骤5: 写入转换后的文件...
+[2025-09-12 10:57:06] [INFO] 成功迁移文件: Agent_DeviceListActivity.java
+[2025-09-12 10:57:06] [INFO] 步骤6: 生成迁移报告...
+[2025-09-12 10:57:06] [INFO] 迁移报告已保存到: C:\Users\ygh\PythonWorkSpace\butterknife_migrator\butterknife_migration_report.json
+[2025-09-12 10:57:06] [INFO] ButterKnife迁移流程完成!
+[2025-09-12 11:01:47] [INFO] 开始ButterKnife迁移流程...
+[2025-09-12 11:01:47] [INFO] 步骤1: 扫描项目文件...
+[2025-09-12 11:01:47] [INFO] 找到 1 个Java文件
+[2025-09-12 11:01:47] [INFO] 步骤2: 解析ButterKnife注解...
+[2025-09-12 11:01:47] [INFO] 解析文件: Agent_DeviceListActivity.java
+[2025-09-12 11:01:47] [INFO] 找到 1 个包含ButterKnife的文件
+[2025-09-12 11:01:47] [INFO] 步骤3: 转换代码...
+[2025-09-12 11:01:47] [INFO] 步骤4: 注入初始化代码...
+[2025-09-12 11:01:47] [INFO] 步骤5: 写入转换后的文件...
+[2025-09-12 11:01:47] [INFO] 成功迁移文件: Agent_DeviceListActivity.java
+[2025-09-12 11:01:47] [INFO] 步骤6: 生成迁移报告...
+[2025-09-12 11:01:47] [INFO] 迁移报告已保存到: C:\Users\ygh\PythonWorkSpace\butterknife_migrator\butterknife_migration_report.json
+[2025-09-12 11:01:47] [INFO] ButterKnife迁移流程完成!
+[2025-09-12 11:02:24] [INFO] 检测到普通Java项目: C:\Users\ygh\PythonWorkSpace\butterknife_migrator
+[2025-09-12 11:02:24] [INFO] 发现源码目录: tests
+[2025-09-12 11:02:24] [INFO] 自动配置扫描目录: ['tests']
+[2025-09-12 11:11:11] [INFO] 开始ButterKnife迁移流程...
+[2025-09-12 11:11:11] [INFO] 步骤1: 扫描项目文件...
+[2025-09-12 11:11:11] [INFO] 找到 1 个Java文件
+[2025-09-12 11:11:11] [INFO] 步骤2: 解析ButterKnife注解...
+[2025-09-12 11:11:11] [INFO] 解析文件: Agent_DeviceListActivity.java
+[2025-09-12 11:11:11] [INFO] 找到 1 个包含ButterKnife的文件
+[2025-09-12 11:11:11] [INFO] 步骤3: 转换代码...
+[2025-09-12 11:11:11] [INFO] 步骤4: 注入初始化代码...
+[2025-09-12 11:11:11] [INFO] 步骤5: 写入转换后的文件...
+[2025-09-12 11:11:11] [INFO] 成功迁移文件: Agent_DeviceListActivity.java
+[2025-09-12 11:11:11] [INFO] 步骤6: 生成迁移报告...
+[2025-09-12 11:11:11] [INFO] 迁移报告已保存到: C:\Users\ygh\PythonWorkSpace\butterknife_migrator\butterknife_migration_report.json
+[2025-09-12 11:11:11] [INFO] ButterKnife迁移流程完成!
+[2025-09-12 11:15:14] [INFO] 检测到普通Java项目: C:\Users\ygh\PythonWorkSpace\butterknife_migrator
+[2025-09-12 11:15:14] [INFO] 发现源码目录: tests
+[2025-09-12 11:15:14] [INFO] 自动配置扫描目录: ['tests']
+[2025-09-12 11:24:06] [INFO] 检测到普通Java项目: C:\Users\ygh\PythonWorkSpace\butterknife_migrator
+[2025-09-12 11:24:06] [INFO] 发现源码目录: tests
+[2025-09-12 11:24:06] [INFO] 自动配置扫描目录: ['tests']
+[2025-09-12 11:25:41] [INFO] 开始ButterKnife迁移流程...
+[2025-09-12 11:25:41] [INFO] 步骤1: 扫描项目文件...
+[2025-09-12 11:25:41] [INFO] 找到 1 个Java文件
+[2025-09-12 11:25:41] [INFO] 步骤2: 解析ButterKnife注解...
+[2025-09-12 11:25:41] [INFO] 解析文件: Agent_DeviceListActivity.java
+[2025-09-12 11:25:41] [INFO] 找到 1 个包含ButterKnife的文件
+[2025-09-12 11:25:41] [INFO] 步骤3: 转换代码...
+[2025-09-12 11:25:41] [INFO] 步骤4: 注入初始化代码...
+[2025-09-12 11:25:42] [INFO] 步骤5: 写入转换后的文件...
+[2025-09-12 11:25:42] [INFO] 成功迁移文件: Agent_DeviceListActivity.java
+[2025-09-12 11:25:42] [INFO] 步骤6: 生成迁移报告...
+[2025-09-12 11:25:42] [INFO] 迁移报告已保存到: C:\Users\ygh\PythonWorkSpace\butterknife_migrator\butterknife_migration_report.json
+[2025-09-12 11:25:42] [INFO] ButterKnife迁移流程完成!

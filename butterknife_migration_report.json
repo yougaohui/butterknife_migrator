@@ -1,42 +1,14 @@
 {
-  "total_files": 5,
-  "successful_migrations": 5,
+  "total_files": 1,
+  "successful_migrations": 1,
   "failed_migrations": 0,
   "details": [
     {
-      "file": "AboutActivity.java",
+      "file": "Agent_DeviceListActivity.java",
       "status": "success",
-      "bind_views_count": 0,
-      "on_clicks_count": 0,
-      "has_bind_call": false
-    },
-    {
-      "file": "DfuActivity.java",
-      "status": "success",
-      "bind_views_count": 0,
-      "on_clicks_count": 0,
-      "has_bind_call": false
-    },
-    {
-      "file": "TestActivityWithExistingInitViews.java",
-      "status": "success",
-      "bind_views_count": 0,
-      "on_clicks_count": 0,
-      "has_bind_call": false
-    },
-    {
-      "file": "TestOnLongClickActivity.java",
-      "status": "success",
-      "bind_views_count": 0,
-      "on_clicks_count": 0,
-      "has_bind_call": false
-    },
-    {
-      "file": "WatchTheme2DetailsActivity.java",
-      "status": "success",
-      "bind_views_count": 0,
-      "on_clicks_count": 0,
-      "has_bind_call": false
+      "bind_views_count": 7,
+      "on_clicks_count": 1,
+      "has_bind_call": true
     }
   ]
 }

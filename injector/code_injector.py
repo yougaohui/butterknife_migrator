@@ -58,7 +58,7 @@ class CodeInjector:
         else:
             # 获取需要注入的代码
             injection_code = self._generate_injection_code(parsed_data)
-            
+        
             if injection_code:
                 # 只在onCreate方法中注入代码，不创建新方法
                 code = self._inject_in_oncreate_only(code, injection_code)
@@ -82,6 +82,9 @@ class CodeInjector:
                 field_type = bind_view['type']
                 
                 # 生成findViewById调用，确保在移除@BindView注解前先赋值
+                # 将R2.id转换为R.id
+                if resource_id.startswith('R2.id.'):
+                    resource_id = resource_id.replace('R2.id.', 'R.id.')
                 line = f"        {field_name} = findViewById({resource_id});"
                 lines.append(line)
             lines.append("")
@@ -180,6 +183,9 @@ class CodeInjector:
                 
                 # 检查这个字段是否属于主类
                 if self._is_main_class_field(field_name, bind_views):
+                    # 将R2.id转换为R.id
+                    if resource_id.startswith('R2.id.'):
+                        resource_id = resource_id.replace('R2.id.', 'R.id.')
                     line = f"        {field_name} = findViewById({resource_id});"
                     init_view_lines.append(line)
         
@@ -214,6 +220,9 @@ class CodeInjector:
                                 init_listener_lines.append(f"        {view_name}.setOnClickListener(v -> {method_name}());")
                         else:
                             # 如果View没有在@BindView中声明，直接在initListener中获取并设置监听器
+                            # 将R2.id转换为R.id
+                            if resource_id.startswith('R2.id.'):
+                                resource_id = resource_id.replace('R2.id.', 'R.id.')
                             if has_view_param:
                                 param_type = on_click.get('param_type', 'View')
                                 if param_type == 'View':
@@ -253,6 +262,9 @@ class CodeInjector:
                                 init_listener_lines.append(f"        {view_name}.setOnLongClickListener(v -> {method_name}());")
                         else:
                             # 如果View没有在@BindView中声明，直接在initListener中获取并设置监听器
+                            # 将R2.id转换为R.id
+                            if resource_id.startswith('R2.id.'):
+                                resource_id = resource_id.replace('R2.id.', 'R.id.')
                             if has_view_param:
                                 param_type = on_long_click.get('param_type', 'View')
                                 if param_type == 'View':
@@ -293,17 +305,21 @@ class CodeInjector:
         return self._check_inheritance_chain(code)
     
     def _is_holder_class(self, code: str) -> bool:
-        """检查是否是Holder类（继承自BaseHolder）"""
+        """检查是否是Holder类（继承自BaseHolder或RecyclerView.ViewHolder）"""
         # 只检查最外层的类（第一个class声明）
-        first_class_match = re.search(r'public\s+class\s+(\w+)(?:\s+extends\s+(\w+))?', code)
+        first_class_match = re.search(r'public\s+class\s+(\w+)(?:\s+extends\s+([^\{]+))?', code)
         if not first_class_match:
             return False
         
         class_name = first_class_match.group(1)
         parent_class = first_class_match.group(2) if first_class_match.group(2) else None
         
-        # 检查是否直接继承BaseHolder
+        # 检查是否继承BaseHolder
         if parent_class and 'BaseHolder' in parent_class:
+            return True
+        
+        # 检查是否继承RecyclerView.ViewHolder
+        if parent_class and 'RecyclerView.ViewHolder' in parent_class:
             return True
         
         # 检查类名是否包含Holder，但排除Activity和Fragment
@@ -343,6 +359,9 @@ class CodeInjector:
             for bind_view in bind_views:
                 field_name = bind_view['name']
                 resource_id = bind_view['id']
+                # 将R2.id转换为R.id
+                if resource_id.startswith('R2.id.'):
+                    resource_id = resource_id.replace('R2.id.', 'R.id.')
                 lines.append(f"        {field_name} = itemView.findViewById({resource_id});")
             lines.append("")
         
@@ -367,12 +386,63 @@ class CodeInjector:
                                 lines.append(f"        {view_name}.setOnClickListener(v -> {method_name}(({param_type}) v));")
                         else:
                             lines.append(f"        {view_name}.setOnClickListener(v -> {method_name}());")
-                        lines.append("")
+                    else:
+                        # 如果View没有在@BindView中声明，直接在构造器中获取并设置监听器
+                        # 将R2.id转换为R.id
+                        if resource_id.startswith('R2.id.'):
+                            resource_id = resource_id.replace('R2.id.', 'R.id.')
+                        if has_view_param:
+                            if param_type == 'View':
+                                lines.append(f"        itemView.findViewById({resource_id}).setOnClickListener(v -> {method_name}(v));")
+                            else:
+                                lines.append(f"        itemView.findViewById({resource_id}).setOnClickListener(v -> {method_name}(({param_type}) v));")
+                        else:
+                            lines.append(f"        itemView.findViewById({resource_id}).setOnClickListener(v -> {method_name}());")
+                lines.append("")
+        
+        # 生成@OnLongClick的监听器代码
+        on_long_clicks = parsed_data.get('on_long_clicks', [])
+        if on_long_clicks:
+            lines.append("        // 初始化长按事件 - 替换@OnLongClick注解")
+            for on_long_click in on_long_clicks:
+                method_name = on_long_click['method']
+                resource_ids = on_long_click['ids']
+                has_view_param = on_long_click.get('has_view_param', True)
+                param_type = on_long_click.get('param_type', 'View')
+                
+                for resource_id in resource_ids:
+                    # 查找对应的View变量名
+                    view_name = self._find_view_name_for_resource_id(resource_id, bind_views)
+                    
+                    if view_name:
+                        if has_view_param:
+                            if param_type == 'View':
+                                lines.append(f"        {view_name}.setOnLongClickListener(v -> {method_name}(v));")
+                            else:
+                                lines.append(f"        {view_name}.setOnLongClickListener(v -> {method_name}(({param_type}) v));")
+                        else:
+                            lines.append(f"        {view_name}.setOnLongClickListener(v -> {method_name}());")
+                    else:
+                        # 如果View没有在@BindView中声明，直接在构造器中获取并设置监听器
+                        # 将R2.id转换为R.id
+                        if resource_id.startswith('R2.id.'):
+                            resource_id = resource_id.replace('R2.id.', 'R.id.')
+                        if has_view_param:
+                            if param_type == 'View':
+                                lines.append(f"        itemView.findViewById({resource_id}).setOnLongClickListener(v -> {method_name}(v));")
+                            else:
+                                lines.append(f"        itemView.findViewById({resource_id}).setOnLongClickListener(v -> {method_name}(({param_type}) v));")
+                        else:
+                            lines.append(f"        itemView.findViewById({resource_id}).setOnLongClickListener(v -> {method_name}());")
+                lines.append("")
         
         return '\n'.join(lines)
     
     def _inject_for_holder_class(self, code: str, parsed_data: Dict[str, Any]) -> str:
         """为Holder类注入初始化代码"""
+        # 首先移除ButterKnife注解
+        code = self._remove_butterknife_annotations(code, parsed_data)
+        
         # 生成Holder类的初始化代码
         holder_code = self._generate_holder_injection_code(parsed_data)
         
@@ -717,40 +787,98 @@ class CodeInjector:
         print(f"DEBUG: 创建方法: {method}")
         
         # 在类结束前插入方法（在最后一个}之前）
-        lines = code.split('\n')
-        if class_end < len(lines):
-            # 在指定行之前插入方法
-            lines.insert(class_end, method)
-            return '\n'.join(lines)
-        else:
-            # 如果位置超出范围，在文件末尾添加
-            return code + method
+        # 使用字符位置而不是行号，更精确
+        before_end = code[:class_end-1]  # 在最后一个}之前
+        after_end = code[class_end-1:]   # 从最后一个}开始
+        
+        return before_end + method + "\n" + after_end
     
     def _find_class_end(self, code: str) -> int:
-        """查找类的结束位置"""
-        lines = code.split('\n')
-        brace_count = 0
-        in_class = False
+        """查找主类的结束位置（排除内部类）"""
+        # 首先找到主类的开始位置（支持public和默认访问修饰符）
+        main_class_match = re.search(r'(?:public\s+)?class\s+\w+.*?\{', code, re.DOTALL)
+        print(f"DEBUG: 主类匹配结果: {main_class_match}")
+        if not main_class_match:
+            print("DEBUG: 未找到主类定义")
+            return -1
         
-        for i, line in enumerate(lines):
-            # 查找类开始
-            if re.search(r'public\s+class\s+\w+', line):
-                in_class = True
-                # 找到类开始行，开始计算大括号
-                for char in line:
-                    if char == '{':
-                        brace_count += 1
+        # 从主类开始位置开始计算大括号
+        start_pos = main_class_match.end() - 1  # 回到开括号位置
+        print(f"DEBUG: 主类开始位置: {start_pos}")
+        brace_count = 1
+        in_string = False
+        string_char = None
+        in_comment = False
+        in_single_line_comment = False
+        
+        for i in range(start_pos + 1, len(code)):
+            char = code[i]
+            
+            # 处理单行注释
+            if not in_string and not in_comment and not in_single_line_comment:
+                if i < len(code) - 1 and code[i:i+2] == '//':
+                    in_single_line_comment = True
+                    continue
+            elif in_single_line_comment:
+                if char == '\n':
+                    in_single_line_comment = False
                 continue
             
-            if in_class:
-                # 计算大括号
-                for char in line:
-                    if char == '{':
-                        brace_count += 1
-                    elif char == '}':
-                        brace_count -= 1
-                        if brace_count == 0:
-                            return i
+            # 处理多行注释
+            if not in_string and not in_comment and not in_single_line_comment:
+                if i < len(code) - 1 and code[i:i+2] == '/*':
+                    in_comment = True
+                    continue
+            elif in_comment:
+                if i < len(code) - 1 and code[i:i+2] == '*/':
+                    in_comment = False
+                    continue
+                continue
+            
+            # 处理字符串字面量
+            if char == '"' or char == "'":
+                if not in_string:
+                    in_string = True
+                    string_char = char
+                elif char == string_char:
+                    in_string = False
+                    string_char = None
+                continue
+            
+            if in_string or in_comment or in_single_line_comment:
+                continue
+            
+            # 检查是否遇到内部类定义
+            if char == '}':
+                # 检查这个}是否是主类的结束
+                if brace_count == 1:
+                    print(f"DEBUG: 找到可能的类结束位置: {i}, 剩余代码: {code[i+1:i+50]}")
+                    # 检查}后面是否还有内容（内部类）
+                    remaining_code = code[i+1:].strip()
+                    if remaining_code and not remaining_code.startswith('}'):
+                        # 如果还有内容，检查是否是内部类
+                        # 跳过空白字符和注释
+                        j = i + 1
+                        while j < len(code) and code[j] in ' \t\n\r':
+                            j += 1
+                        
+                        # 检查是否是内部类定义
+                        if j < len(code) - 1:
+                            # 检查是否是class关键字
+                            if (code[j:j+5] == 'class' or 
+                                (j < len(code) - 10 and 'class' in code[j:j+10])):
+                                print(f"DEBUG: 发现内部类，继续寻找主类结束")
+                                # 这是内部类，继续寻找主类结束
+                                brace_count -= 1
+                                continue
+                    
+                    # 找到主类结束位置
+                    print(f"DEBUG: 找到主类结束位置: {i + 1}")
+                    return i + 1
+                else:
+                    brace_count -= 1
+            elif char == '{':
+                brace_count += 1
         
         return -1
     
@@ -819,7 +947,7 @@ class CodeInjector:
             extends = inner_class.get('extends', '')
             
             # 检查是否是Holder类
-            if 'Holder' in class_name and 'BaseHolder' in extends:
+            if 'Holder' in class_name and ('BaseHolder' in extends or 'RecyclerView' in extends):
                 # 检查是否已经处理过这个类
                 class_content = code[class_start:class_end]
                 if '// 初始化View绑定 - 替换@BindView注解' in class_content:
@@ -859,7 +987,7 @@ class CodeInjector:
         inner_classes = []
         
         # 查找所有class声明
-        class_pattern = re.compile(r'class\s+(\w+)(?:\s+extends\s+(\w+))?', re.MULTILINE)
+        class_pattern = re.compile(r'class\s+(\w+)(?:\s+extends\s+([\w.]+))?', re.MULTILINE)
         matches = class_pattern.finditer(code)
         
         for match in matches:
@@ -1079,51 +1207,9 @@ class CodeInjector:
         return '\n'.join(new_lines)
     
     def _find_class_end_position(self, code: str) -> int:
-        """找到类的真正结束位置（最后一个大括号）"""
-        # 使用更精确的方法：找到最外层类的结束大括号
-        brace_count = 0
-        in_string = False
-        string_char = None
-        in_comment = False
-        class_started = False
-        
-        for i, char in enumerate(code):
-            # 处理注释
-            if not in_string and not in_comment:
-                if i < len(code) - 1 and code[i:i+2] == '/*':
-                    in_comment = True
-                    continue
-            elif in_comment:
-                if i < len(code) - 1 and code[i:i+2] == '*/':
-                    in_comment = False
-                    continue
-                continue
-            
-            # 处理字符串字面量
-            if char == '"' or char == "'":
-                if not in_string:
-                    in_string = True
-                    string_char = char
-                elif char == string_char:
-                    in_string = False
-                    string_char = None
-                continue
-            
-            if in_string or in_comment:
-                continue
-            
-            if char == '{':
-                if not class_started:
-                    # 找到第一个开括号，说明类开始了
-                    class_started = True
-                brace_count += 1
-            elif char == '}':
-                brace_count -= 1
-                if class_started and brace_count == 0:
-                    # 找到匹配的闭括号，这是类的结束位置
-                    return i + 1
-        
-        return -1
+        """找到主类的真正结束位置（排除内部类）"""
+        # 直接使用_find_class_end方法
+        return self._find_class_end(code)
     
     def _find_view_name_for_resource_id(self, resource_id: str, bind_views: List[Dict[str, Any]]) -> Optional[str]:
         """根据资源ID查找对应的View变量名"""

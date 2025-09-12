@@ -23,6 +23,7 @@ from transformer.bindcall_remover import BindCallRemover
 from injector.code_injector import CodeInjector
 from writer.file_writer import FileWriter
 from utils.logger import Logger
+from utils.code_formatter import CodeFormatter
 
 
 class AutoButterKnifeMigrator:
@@ -33,6 +34,7 @@ class AutoButterKnifeMigrator:
         self.logger = Logger()
         self.scanner = FileScanner(self.config)
         self.parser = ButterKnifeParser()
+        self.formatter = CodeFormatter()
         self.transformers = [
             FindViewTransformer(),
             OnClickTransformer(),
@@ -137,6 +139,14 @@ class AutoButterKnifeMigrator:
                     # 读取文件内容
                     with open(file_path, 'r', encoding='utf-8') as f:
                         content = f.read()
+                    
+                    # 检测格式化问题
+                    issues = self.formatter.detect_formatting_issues(content)
+                    if issues:
+                        print(f"   🔧 发现格式化问题: {', '.join(issues)}")
+                        # 格式化代码
+                        content = self.formatter.format_entire_file(content)
+                        print(f"   ✅ 代码格式化完成")
                     
                     # 解析ButterKnife注解
                     parsed_data = self.parser.parse(content)

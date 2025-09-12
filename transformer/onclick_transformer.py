@@ -40,11 +40,14 @@ class OnClickTransformer(BaseTransformer):
         transformed_code = original_code
         on_clicks = parsed_data.get('on_clicks', [])
         
-        # 只替换@OnClick注解为普通方法
+        # 替换@OnClick注解为普通方法
         for on_click in on_clicks:
             transformed_code = self._replace_on_click_annotation(
                 transformed_code, on_click
             )
+        
+        # 添加setOnClickListener初始化代码
+        transformed_code = self._add_onclick_listener_initialization(transformed_code, on_clicks)
         
         return transformed_code
     
@@ -199,24 +202,57 @@ class OnClickTransformer(BaseTransformer):
     
     def _add_onclick_initialization_method(self, code: str, initialization_code: str) -> str:
         """添加OnClick初始化方法"""
-        # 查找类的结束位置
-        class_end_pattern = re.compile(r'(\s*)\}\s*$', re.MULTILINE)
+        # 查找主类的结束位置（排除内部类）
+        main_class_end = self._find_main_class_end(code)
         
-        match = class_end_pattern.search(code)
-        if match:
+        if main_class_end != -1:
             # 在类结束前添加初始化方法
             method_code = f"""
-    private void initializeOnClickListeners() {{
+    private void initListener() {{
 {initialization_code}
     }}
 """
             
-            before_end = code[:match.start()]
-            after_end = code[match.start():]
+            before_end = code[:main_class_end]
+            after_end = code[main_class_end:]
             
             return before_end + method_code + after_end
         
         return code
+    
+    def _find_main_class_end(self, code: str) -> int:
+        """查找主类的结束位置，排除内部类"""
+        lines = code.split('\n')
+        brace_count = 0
+        in_main_class = False
+        main_class_start = -1
+        
+        # 查找主类开始位置
+        for i, line in enumerate(lines):
+            if re.match(r'\s*public\s+class\s+\w+', line):
+                main_class_start = i
+                break
+        
+        if main_class_start == -1:
+            return -1
+        
+        # 从主类开始位置计算大括号
+        for i in range(main_class_start, len(lines)):
+            line = lines[i]
+            
+            # 计算大括号
+            for char in line:
+                if char == '{':
+                    brace_count += 1
+                    if brace_count == 1:
+                        in_main_class = True
+                elif char == '}':
+                    brace_count -= 1
+                    if in_main_class and brace_count == 0:
+                        # 找到主类结束位置
+                        return sum(len(lines[j]) + 1 for j in range(i + 1))
+        
+        return -1
     
     def _has_onclick_initialization_code(self, code: str, on_clicks: List[Dict[str, Any]]) -> bool:
         """检查是否已经包含OnClick初始化代码"""

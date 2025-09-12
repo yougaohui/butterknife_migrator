@@ -15,9 +15,10 @@ class ButterKnifeParser:
     
     def __init__(self):
         # 编译正则表达式以提高性能
+        # 支持同一行和多行格式的@BindView注解
         self.bind_view_pattern = re.compile(
-            r'@BindView\s*\(\s*(R2?\.id\.\w+)\s*\)\s*\n\s*(?:public\s+|private\s+|protected\s+)?(\w+)\s+(\w+)\s*;',
-            re.MULTILINE | re.DOTALL
+            r'@BindView\s*\(\s*(R2?\.id\.\w+)\s*\)\s+(?:public\s+|private\s+|protected\s+)?(\w+)\s+(\w+)\s*;',
+            re.MULTILINE
         )
         
         self.on_click_pattern = re.compile(
@@ -126,7 +127,9 @@ class ButterKnifeParser:
     def _parse_bind_views(self, content: str) -> List[Dict]:
         """解析@BindView注解"""
         bind_views = []
-        matches = self.bind_view_pattern.findall(content)
+        # 过滤掉注释掉的代码
+        filtered_content = self._remove_commented_code(content)
+        matches = self.bind_view_pattern.findall(filtered_content)
         
         for match in matches:
             resource_id, field_type, field_name = match
@@ -142,7 +145,9 @@ class ButterKnifeParser:
     def _parse_on_clicks(self, content: str) -> List[Dict]:
         """解析@OnClick注解"""
         on_clicks = []
-        matches = self.on_click_pattern.findall(content)
+        # 过滤掉注释掉的代码
+        filtered_content = self._remove_commented_code(content)
+        matches = self.on_click_pattern.findall(filtered_content)
         
         for match in matches:
             resource_ids_str, method_name = match
@@ -201,26 +206,107 @@ class ButterKnifeParser:
     
     def _check_method_has_view_param(self, content: str, method_name: str) -> Tuple[bool, str]:
         """检查方法是否有View参数，并返回参数类型"""
-        # 查找方法定义
-        method_pattern = re.compile(
-            rf'(?:public\s+|private\s+|protected\s+)?(?:static\s+)?(?:void\s+|boolean\s+)?{re.escape(method_name)}\s*\(([^)]*)\)',
-            re.MULTILINE
-        )
+        # 查找主类中的方法定义，使用更严谨的方法边界检测
+        method_start, method_end = self._find_method_boundaries(content, method_name)
         
-        match = method_pattern.search(content)
-        if match:
-            params = match.group(1).strip()
-            if params:
-                # 检查参数中是否包含View类型（包括所有View子类）
-                param_type = self._extract_view_param_type(params)
-                if param_type != 'View' or 'View' in params:
-                    return True, param_type
+        if method_start != -1 and method_end != -1:
+            # 提取方法签名
+            method_signature = content[method_start:method_end].split('{')[0]
+            # 提取参数部分
+            param_match = re.search(r'\(([^)]*)\)', method_signature)
+            if param_match:
+                params = param_match.group(1).strip()
+                if params:
+                    # 检查参数中是否包含View类型（包括所有View子类）
+                    param_type = self._extract_view_param_type(params)
+                    if param_type != 'View' or 'View' in params:
+                        return True, param_type
+                    else:
+                        return False, ""
                 else:
                     return False, ""
-            else:
-                return False, ""
         
         return False, ""
+    
+    def _find_method_boundaries(self, content: str, method_name: str) -> Tuple[int, int]:
+        """查找方法的开始和结束位置，使用严谨的大括号匹配算法"""
+        lines = content.split('\n')
+        
+        # 查找方法开始位置
+        method_start = -1
+        for i, line in enumerate(lines):
+            # 查找主类中的方法定义（不在匿名内部类中）
+            if re.match(rf'^\s*(?:public\s+|private\s+|protected\s+)?(?:static\s+)?(?:void\s+|boolean\s+)?{re.escape(method_name)}\s*\([^)]*\)\s*{{', line):
+                method_start = sum(len(lines[j]) + 1 for j in range(i))
+                break
+        
+        if method_start == -1:
+            return -1, -1
+        
+        # 使用严谨的大括号匹配算法查找方法结束位置
+        brace_count = 0
+        in_method = False
+        method_end = -1
+        
+        for i, char in enumerate(content[method_start:], method_start):
+            if char == '{':
+                brace_count += 1
+                if brace_count == 1:
+                    in_method = True
+            elif char == '}':
+                brace_count -= 1
+                if in_method and brace_count == 0:
+                    method_end = i + 1
+                    break
+        
+        return method_start, method_end
+    
+    def _remove_commented_code(self, content: str) -> str:
+        """移除注释掉的代码，使用更严谨的注释处理"""
+        lines = content.split('\n')
+        filtered_lines = []
+        in_block_comment = False
+        
+        for line in lines:
+            # 处理块注释
+            if '/*' in line and '*/' in line:
+                # 单行块注释，跳过
+                continue
+            elif '/*' in line:
+                # 块注释开始
+                in_block_comment = True
+                # 保留块注释前的代码
+                before_comment = line.split('/*')[0]
+                if before_comment.strip():
+                    filtered_lines.append(before_comment)
+                continue
+            elif '*/' in line:
+                # 块注释结束
+                in_block_comment = False
+                # 保留块注释后的代码
+                after_comment = line.split('*/')[1]
+                if after_comment.strip():
+                    filtered_lines.append(after_comment)
+                continue
+            elif in_block_comment:
+                # 在块注释中，跳过
+                continue
+            
+            # 处理行注释
+            if '//' in line:
+                # 保留注释前的代码
+                before_comment = line.split('//')[0]
+                if before_comment.strip():
+                    filtered_lines.append(before_comment)
+            else:
+                # 检查是否是注释行
+                stripped = line.strip()
+                if stripped.startswith('//') or stripped.startswith('*'):
+                    # 跳过注释行
+                    continue
+                filtered_lines.append(line)
+        
+        return '\n'.join(filtered_lines)
     
     def _extract_view_param_type(self, params: str) -> str:
         """从参数中提取View类型"""

@@ -40,11 +40,14 @@ class FindViewTransformer(BaseTransformer):
         transformed_code = original_code
         bind_views = parsed_data.get('bind_views', [])
         
-        # 只替换@BindView注解为普通字段声明
+        # 替换@BindView注解为普通字段声明
         for bind_view in bind_views:
             transformed_code = self._replace_bind_view_annotation(
                 transformed_code, bind_view
             )
+        
+        # 添加findViewById初始化代码
+        transformed_code = self._add_findviewbyid_initialization(transformed_code, bind_views)
         
         return transformed_code
     
@@ -54,11 +57,19 @@ class FindViewTransformer(BaseTransformer):
         field_name = bind_view['name']
         resource_id = bind_view['id']
         
-        # 查找@BindView注解行（支持多行格式和修饰符）
+        # 查找@BindView注解行（支持同一行和多行格式）
         escaped_resource_id = re.escape(resource_id)
         escaped_field_type = re.escape(field_type)
         escaped_field_name = re.escape(field_name)
-        pattern = re.compile(
+        
+        # 模式1：同一行的格式 @BindView(R.id.xxx) Type fieldName;
+        pattern1 = re.compile(
+            r'@BindView\s*\(\s*' + escaped_resource_id + r'\s*\)\s+(?:public\s+|private\s+|protected\s+)?' + escaped_field_type + r'\s+' + escaped_field_name + r'\s*;',
+            re.MULTILINE
+        )
+        
+        # 模式2：多行的格式
+        pattern2 = re.compile(
             r'@BindView\s*\(\s*' + escaped_resource_id + r'\s*\)\s*\n\s*(?:public\s+|private\s+|protected\s+)?' + escaped_field_type + r'\s+' + escaped_field_name + r'\s*;',
             re.MULTILINE | re.DOTALL
         )
@@ -66,7 +77,14 @@ class FindViewTransformer(BaseTransformer):
         # 替换为普通字段声明
         replacement = f"{field_type} {field_name};"
         
-        return pattern.sub(replacement, code)
+        # 先尝试模式1（同一行）
+        result = pattern1.sub(replacement, code)
+        if result != code:
+            return result
+        
+        # 再尝试模式2（多行）
+        result = pattern2.sub(replacement, code)
+        return result
     
     def _add_findviewbyid_initialization(self, code: str, bind_views: List[Dict[str, Any]]) -> str:
         """添加findViewById初始化代码"""
@@ -182,24 +200,57 @@ class FindViewTransformer(BaseTransformer):
     
     def _add_initialization_method(self, code: str, initialization_code: str) -> str:
         """添加初始化方法"""
-        # 查找类的结束位置
-        class_end_pattern = re.compile(r'(\s*)\}\s*$', re.MULTILINE)
+        # 查找主类的结束位置（排除内部类）
+        main_class_end = self._find_main_class_end(code)
         
-        match = class_end_pattern.search(code)
-        if match:
+        if main_class_end != -1:
             # 在类结束前添加初始化方法
             method_code = f"""
-    private void initializeViews() {{
+    private void initViews() {{
 {initialization_code}
     }}
 """
             
-            before_end = code[:match.start()]
-            after_end = code[match.start():]
+            before_end = code[:main_class_end]
+            after_end = code[main_class_end:]
             
             return before_end + method_code + after_end
         
         return code
+    
+    def _find_main_class_end(self, code: str) -> int:
+        """查找主类的结束位置，排除内部类"""
+        lines = code.split('\n')
+        brace_count = 0
+        in_main_class = False
+        main_class_start = -1
+        
+        # 查找主类开始位置
+        for i, line in enumerate(lines):
+            if re.match(r'\s*public\s+class\s+\w+', line):
+                main_class_start = i
+                break
+        
+        if main_class_start == -1:
+            return -1
+        
+        # 从主类开始位置计算大括号
+        for i in range(main_class_start, len(lines)):
+            line = lines[i]
+            
+            # 计算大括号
+            for char in line:
+                if char == '{':
+                    brace_count += 1
+                    if brace_count == 1:
+                        in_main_class = True
+                elif char == '}':
+                    brace_count -= 1
+                    if in_main_class and brace_count == 0:
+                        # 找到主类结束位置
+                        return sum(len(lines[j]) + 1 for j in range(i + 1))
+        
+        return -1
     
     def _has_initialization_code(self, code: str, bind_views: List[Dict[str, Any]]) -> bool:
         """检查是否已经包含初始化代码"""
