@@ -84,6 +84,8 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.agent_device_lists);
+        initViews();
+        initListener();
         //log("Agent Device list onCreate");
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         tvDevices = (TextView) findViewById(R.id.tvDevices);
@@ -107,13 +109,6 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
                     }
                 });
             }
-                listview = (ListView) findViewById(R.id.listview);
-        tvAll = (TextView) findViewById(R.id.tvAll);
-        tvAlltvAllDeivces = (TextView) findViewById(R.id.tvAllDeivces);
-        finddevice = (EditText) findViewById(R.id.finddevice);
-        tbCancel = (TextView) findViewById(R.id.tbCancel);
-        tvAgent = (TextView) findViewById(R.id.tvAgent);
-        tbFind = (TextView) findViewById(R.id.tbFind);
     });
         mProgressDilog = new MProgressDilog(this);
         if (mProgressDilog != null) {
@@ -144,7 +139,6 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
         filter.addAction("android.intent.action.SCREEN_OFF");
         filter.addAction("android.intent.action.SCREEN_ON");
         RegisterReceiverHelper.registerReceiver(mContext,receiver, filter);
-        finddevice = (EditText) findViewById(R.id.finddevice);
         finddevice.addTextChangedListener(textWatcher);
         /*finddevice.setOnKeyListener(new View.OnKeyListener() {
             public boolean onKey(View v, int keyCode, KeyEvent event) {
@@ -164,9 +158,7 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
            }
         });*/
         tvAlltvAllDeivces.setVisibility(View.GONE);
-    
-        initViews();
-        initListener();}
+    }
     private TextWatcher textWatcher = new TextWatcher() {
         @Override
         public void afterTextChanged(Editable s) {
@@ -1117,6 +1109,9 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
         } else {
             //log("get Agent Device List1 " + AG );
         }
+        //} else {
+        //    log("get Agent Device List2 " + AG  );
+        //}
     }
     //获取当前账号所有设备的信息
     public  void getDeviceInfos(final String userName, final String passWord, final int no ){
@@ -1410,18 +1405,5 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
         tbCancel = findViewById(R.id.tbCancel);
         tvAgent = findViewById(R.id.tvAgent);
         tbFind = findViewById(R.id.tbFind);
-    }
-    
-    private void initListener() {
-        // 初始化点击事件 - 替换@OnClick注解
-        findViewById(R.id.tvAgent).setOnClickListener(v -> onClick(v));
-        findViewById(R.id.tvapw).setOnClickListener(v -> onClick(v));
-        findViewById(R.id.tvRefresh).setOnClickListener(v -> onClick(v));
-        findViewById(R.id.tvAllDeivces).setOnClickListener(v -> onClick(v));
-        findViewById(R.id.tvAll).setOnClickListener(v -> onClick(v));
-        findViewById(R.id.tvOnline).setOnClickListener(v -> onClick(v));
-        findViewById(R.id.tvOffline).setOnClickListener(v -> onClick(v));
-        findViewById(R.id.tbCancel).setOnClickListener(v -> onClick(v));
-        findViewById(R.id.tbFind).setOnClickListener(v -> onClick(v));
     }
 }

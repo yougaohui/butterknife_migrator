@@ -47,11 +47,11 @@ class CodeInjector:
         if self._is_holder_class(code):
             print("DEBUG: 检测到Holder类，使用Holder特殊处理")
             code = self._inject_for_holder_class(code, parsed_data)
-        # 检查是否是普通Activity（有setContentView）
+        # 检查是否有setContentView（优先级第二，即使继承BaseActivity也要按通用原则处理）
         elif self._has_setcontentview(code):
-            print("DEBUG: 检测到普通Activity（有setContentView），使用通用迁移处理")
+            print("DEBUG: 检测到有setContentView，使用通用迁移处理")
             code = self._inject_for_general_activity(code, parsed_data)
-        # 检查是否继承自NewBaseActivity或NewBaseFragment
+        # 检查是否继承自NewBaseActivity或NewBaseFragment（但没有setContentView）
         elif self._is_newbase_activity(code):
             print("DEBUG: 检测到继承自NewBaseActivity或NewBaseFragment，使用定制化处理")
             code = self._inject_for_newbase_activity(code, parsed_data)
@@ -90,7 +90,7 @@ class CodeInjector:
             lines.append("")
         
         # 2. 处理@OnClick注解，生成setOnClickListener初始化代码
-        # 保留@OnClick注解下的完整方法，只移除注解本身，然后为每个View设置监听器
+        # 直接使用findViewById调用，不查找View变量名
         on_clicks = parsed_data.get('on_clicks', [])
         if on_clicks:
             lines.append("        // 初始化点击事件 - 替换@OnClick注解")
@@ -99,25 +99,20 @@ class CodeInjector:
                 method_name = on_click['method']
                 
                 for resource_id in resource_ids:
-                    # 查找对应的View变量名
-                    view_name = self._find_view_name_for_resource_id(resource_id, bind_views)
+                    # 将R2.id转换为R.id
+                    if resource_id.startswith('R2.id.'):
+                        resource_id = resource_id.replace('R2.id.', 'R.id.')
                     
-                    if view_name:
-                        # 检查方法是否有View参数
-                        has_view_param = on_click.get('has_view_param', True)  # 默认为True保持向后兼容
-                        
-                        # 生成setOnClickListener调用，使用Lambda表达式
-                        if has_view_param:
-                            # 如果方法有View参数，传入v（可能需要强转）
-                            param_type = on_click.get('param_type', 'View')
-                            if param_type == 'View':
-                                lines.append(f"        {view_name}.setOnClickListener(v -> {method_name}(v));")
-                            else:
-                                lines.append(f"        {view_name}.setOnClickListener(v -> {method_name}(({param_type}) v));")
-                        else:
-                            # 如果方法没有View参数，不传入v
-                            lines.append(f"        {view_name}.setOnClickListener(v -> {method_name}());")
-                        lines.append("")
+                    # 检查方法是否有View参数
+                    has_view_param = on_click.get('has_view_param', True)  # 默认为True保持向后兼容
+                    
+                    # 生成setOnClickListener调用，直接使用findViewById
+                    if has_view_param:
+                        # 如果方法有View参数，传入v
+                        lines.append(f"        findViewById({resource_id}).setOnClickListener(v -> {method_name}(v));")
+                    else:
+                        # 如果方法没有View参数，不传入v
+                        lines.append(f"        findViewById({resource_id}).setOnClickListener(v -> {method_name}());")
         
         # 处理@OnLongClick注解
         on_long_clicks = parsed_data.get('on_long_clicks', [])
@@ -642,27 +637,194 @@ class CodeInjector:
         init_views_code = self._generate_init_views_for_general_activity(parsed_data)
         init_listener_code = self._generate_init_listener_for_general_activity(parsed_data)
         
-        # 检查方法是否已存在，如果存在则更新，否则创建
+        # 检查是否已经有initViews和initListener方法
+        has_existing_initviews = self._has_method(code, 'initViews')
+        has_existing_initlistener = self._has_method(code, 'initListener')
+        
+        # 原则1: View初始化必须在initViews方法中
         if init_views_code:
-            if self._has_method(code, 'initViews'):
+            if has_existing_initviews:
                 print("DEBUG: initViews方法已存在，更新其内容")
                 code = self._update_method(code, 'initViews', init_views_code)
             else:
                 print("DEBUG: 创建新的initViews方法")
                 code = self._create_method(code, 'initViews', init_views_code, 'protected')
         
+        # 原则2: 监听器设置必须在initListener方法中
         if init_listener_code:
-            if self._has_method(code, 'initListener'):
+            if has_existing_initlistener:
                 print("DEBUG: initListener方法已存在，更新其内容")
                 code = self._update_method(code, 'initListener', init_listener_code)
             else:
                 print("DEBUG: 创建新的initListener方法")
                 code = self._create_method(code, 'initListener', init_listener_code, 'public')
         
-        # 在onCreate方法中调用initViews和initListener
-        code = self._inject_method_calls_in_oncreate(code)
+        # 原则3: 如果有setContentView，initViews和initListener的调用需要在setContentView下面
+        # 原则4: 确保不会在onCreate中直接注入View初始化和监听器代码
+        if init_views_code or init_listener_code:
+            print("DEBUG: 在onCreate中注入initViews和initListener方法调用")
+            code = self._inject_method_calls_in_oncreate(code)
+        
+        # 清理onCreate方法中可能存在的重复findViewById代码和监听器设置
+        code = self._clean_duplicate_findview_in_oncreate(code, parsed_data)
         
         return code
+    
+    def _clean_duplicate_findview_in_oncreate(self, code: str, parsed_data: Dict[str, Any]) -> str:
+        """清理onCreate方法中重复的findViewById代码和OnClickListener设置"""
+        print("DEBUG: 开始清理onCreate方法中重复的UI初始化代码")
+        
+        # 查找onCreate方法
+        onCreate_pattern = r'protected\s+void\s+onCreate\s*\([^)]*\)\s*\{'
+        match = re.search(onCreate_pattern, code)
+        
+        if not match:
+            print("DEBUG: 没有找到onCreate方法")
+            return code
+        
+        # 查找onCreate方法的结束位置
+        start_pos = match.end()
+        brace_count = 1
+        end_pos = start_pos
+        
+        for i in range(start_pos, len(code)):
+            if code[i] == '{':
+                brace_count += 1
+            elif code[i] == '}':
+                brace_count -= 1
+                if brace_count == 0:
+                    end_pos = i
+                    break
+        
+        # 获取onCreate方法的内容
+        onCreate_content = code[start_pos:end_pos]
+        lines = onCreate_content.split('\n')
+        
+        # 收集需要清理的行
+        lines_to_remove = []
+        
+        # 定义需要清理的UI变量名
+        ui_variables = [
+            'listview', 'tvAll', 'tvAlltvAllDeivces', 'finddevice', 
+            'tbCancel', 'tvAgent', 'tbFind', 'view_tvAgent', 'view_tvapw', 
+            'view_tvRefresh', 'view_tbFind', 'view_tbCancel'
+        ]
+        
+        # 检查onCreate方法中的每一行
+        i = 0
+        while i < len(lines):
+            line = lines[i]
+            line_stripped = line.strip()
+            
+            # 检查是否是重复的findViewById调用（最宽松的匹配）
+            if 'findViewById(' in line and '=' in line:
+                # 提取变量名（忽略缩进）
+                var_name = line.strip().split('=')[0].strip()
+                # 检查是否是UI变量
+                if var_name in ui_variables:
+                    lines_to_remove.append(i)
+                    print(f"DEBUG: 标记删除重复的findViewById行: {line_stripped}")
+            
+            # 检查是否是重复的findViewById调用（精确匹配）
+            elif 'findViewById(' in line_stripped and '=' in line_stripped:
+                # 提取变量名
+                if '=' in line_stripped:
+                    var_name = line_stripped.split('=')[0].strip()
+                    # 检查是否是UI变量
+                    if var_name in ui_variables:
+                        lines_to_remove.append(i)
+                        print(f"DEBUG: 标记删除重复的findViewById行: {line_stripped}")
+            
+            # 检查是否是重复的findViewById调用（处理各种缩进格式）
+            elif 'findViewById(' in line and '=' in line:
+                # 提取变量名（忽略缩进）
+                var_name = line.strip().split('=')[0].strip()
+                # 检查是否是UI变量
+                if var_name in ui_variables:
+                    lines_to_remove.append(i)
+                    print(f"DEBUG: 标记删除重复的findViewById行: {line_stripped}")
+            
+            # 检查是否是重复的OnClickListener设置
+            elif 'setOnClickListener(' in line_stripped:
+                # 检查是否是UI变量的监听器设置
+                for var_name in ui_variables:
+                    if f"{var_name}.setOnClickListener" in line_stripped:
+                        # 找到这个OnClickListener块的结束位置
+                        j = i
+                        brace_count = 0
+                        in_onclick = False
+                        while j < len(lines):
+                            current_line = lines[j]
+                            if '{' in current_line:
+                                brace_count += current_line.count('{')
+                                in_onclick = True
+                            if '}' in current_line:
+                                brace_count -= current_line.count('}')
+                                if brace_count == 0 and in_onclick:
+                                    # 删除整个OnClickListener块
+                                    for k in range(i, j + 1):
+                                        if k not in lines_to_remove:
+                                            lines_to_remove.append(k)
+                                            print(f"DEBUG: 标记删除OnClickListener行: {lines[k].strip()}")
+                                    i = j  # 跳过已处理的块
+                                    break
+                            j += 1
+                        break
+                # 检查是否是其他监听器设置（不限于UI变量）
+                if not any(f"{var_name}.setOnClickListener" in line_stripped for var_name in ui_variables):
+                    # 找到这个OnClickListener块的结束位置
+                    j = i
+                    brace_count = 0
+                    in_onclick = False
+                    while j < len(lines):
+                        current_line = lines[j]
+                        if '{' in current_line:
+                            brace_count += current_line.count('{')
+                            in_onclick = True
+                        if '}' in current_line:
+                            brace_count -= current_line.count('}')
+                            if brace_count == 0 and in_onclick:
+                                # 删除整个OnClickListener块
+                                for k in range(i, j + 1):
+                                    if k not in lines_to_remove:
+                                        lines_to_remove.append(k)
+                                        print(f"DEBUG: 标记删除OnClickListener行: {lines[k].strip()}")
+                                i = j  # 跳过已处理的块
+                                break
+                        j += 1
+            
+            # 检查是否是多余的});行（但要小心不要删除OnClickListener的闭括号）
+            elif line_stripped == '});' or line_stripped == '}':
+                # 检查前面是否有被删除的代码
+                if i > 0 and any(k in lines_to_remove for k in range(max(0, i-5), i)):
+                    # 检查是否是OnClickListener的闭括号
+                    is_onclick_brace = False
+                    for j in range(max(0, i-10), i):
+                        if j < len(lines) and 'setOnClickListener' in lines[j]:
+                            is_onclick_brace = True
+                            break
+                    
+                    if not is_onclick_brace:
+                        lines_to_remove.append(i)
+                        print(f"DEBUG: 标记删除多余的结束括号: {line_stripped}")
+                    else:
+                        print(f"DEBUG: 保留OnClickListener的闭括号: {line_stripped}")
+            
+            i += 1
+        
+        # 删除标记的行（从后往前删除，避免索引变化）
+        for i in reversed(sorted(lines_to_remove)):
+            if i < len(lines):
+                del lines[i]
+        
+        if lines_to_remove:
+            print(f"DEBUG: 删除了 {len(lines_to_remove)} 行重复的UI初始化代码")
+            # 重新构建onCreate方法
+            new_oncreate_content = '\n'.join(lines)
+            return code[:start_pos] + new_oncreate_content + code[end_pos:]
+        else:
+            print("DEBUG: 没有找到需要清理的重复UI初始化代码")
+            return code
     
     def _generate_init_views_for_general_activity(self, parsed_data: Dict[str, Any]) -> str:
         """为普通Activity生成initViews方法内容"""
@@ -767,6 +929,15 @@ class CodeInjector:
                 print(f"DEBUG: {method_name}方法中已存在ButterKnife迁移代码，跳过追加")
                 return code
             
+            # 检查是否已经有相同的findViewById代码，避免重复添加
+            if method_name == 'initViews':
+                # 检查是否已经有相同的findViewById调用
+                new_lines_list = new_content.split('\n')
+                for new_line in new_lines_list:
+                    if 'findViewById(' in new_line and new_line.strip() in existing_content:
+                        print(f"DEBUG: {method_name}方法中已存在相同的findViewById调用，跳过重复添加")
+                        return code
+            
             # 在方法结束前追加新内容，保持原有代码
             new_lines = lines[:method_end] + [new_content] + lines[method_end:]
             return '\n'.join(new_lines)
@@ -779,8 +950,15 @@ class CodeInjector:
         class_end = self._find_class_end(code)
         print(f"DEBUG: 查找类结束位置: {class_end}")
         if class_end == -1:
-            print("DEBUG: 未找到类结束位置，无法创建方法")
-            return code
+            print("DEBUG: 未找到类结束位置，尝试使用备用方法")
+            # 备用方法：查找最后一个独立的}
+            last_brace = code.rfind('}')
+            if last_brace != -1:
+                class_end = last_brace + 1
+                print(f"DEBUG: 使用备用方法找到类结束位置: {class_end}")
+            else:
+                print("DEBUG: 无法找到类结束位置，无法创建方法")
+                return code
         
         # 生成方法
         method = f"\n    {visibility} void {method_name}() {{\n{content}\n    }}"
@@ -884,12 +1062,16 @@ class CodeInjector:
     
     def _inject_method_calls_in_oncreate(self, code: str) -> str:
         """在onCreate方法中注入initViews和initListener调用"""
+        print("DEBUG: 开始注入initViews和initListener调用")
         # 查找onCreate方法
-        onCreate_pattern = r'protected\s+void\s+onCreate\s*\([^)]*Bundle\s+savedInstanceState[^)]*\)\s*\{'
+        onCreate_pattern = r'protected\s+void\s+onCreate\s*\([^)]*\)\s*\{'
         match = re.search(onCreate_pattern, code)
         
         if not match:
+            print("DEBUG: 没有找到onCreate方法")
             return code
+        
+        print(f"DEBUG: 找到onCreate方法，位置: {match.start()}-{match.end()}")
         
         # 查找onCreate方法的结束位置
         start_pos = match.end()
@@ -914,6 +1096,19 @@ class CodeInjector:
             print("DEBUG: onCreate方法中initViews和initListener调用已存在，跳过注入")
             return code
         
+        # 查找setContentView调用，确保initViews和initListener调用在setContentView下面
+        setcontentview_pattern = re.compile(r'setContentView\s*\([^)]*\)\s*;', re.MULTILINE)
+        setcontentview_match = setcontentview_pattern.search(code, start_pos, end_pos)
+        
+        if setcontentview_match:
+            # 在setContentView之后注入方法调用
+            injection_position = setcontentview_match.end()
+            print(f"DEBUG: 在setContentView之后注入方法调用，位置: {injection_position}")
+        else:
+            # 如果没有找到setContentView，在onCreate方法末尾注入
+            injection_position = end_pos
+            print("DEBUG: 没有找到setContentView，在onCreate方法末尾注入")
+        
         # 在onCreate方法中添加调用
         if has_initviews and not has_initlistener:
             # 只有initViews()，添加initListener()
@@ -929,7 +1124,7 @@ class CodeInjector:
             method_calls = ""
         
         if method_calls:
-            return code[:end_pos] + method_calls + code[end_pos:]
+            return code[:injection_position] + method_calls + code[injection_position:]
         else:
             return code
     
@@ -1452,18 +1647,18 @@ class CodeInjector:
             # 如果没有找到setContentView，在onCreate方法末尾注入
             method_end = self._find_oncreate_method_end(code, method_start)
             print(f"DEBUG: 没有找到setContentView，在onCreate方法末尾注入，位置: {method_end}")
-        
-        if method_end > method_start:
-            before_end = code[:method_end]
-            after_end = code[method_end:]
             
-            if not self._has_injection_code(before_end, injection_code):
-                print(f"DEBUG: 注入代码到onCreate方法末尾")
-                result = before_end + '\n' + injection_code + '\n    ' + after_end
-                print(f"DEBUG: 注入后的代码长度: {len(result)}")
-                return result
-            else:
-                print(f"DEBUG: 代码已经存在，跳过注入")
+            if method_end > method_start:
+                before_end = code[:method_end]
+                after_end = code[method_end:]
+                
+                if not self._has_injection_code(before_end, injection_code):
+                    print(f"DEBUG: 注入代码到onCreate方法末尾")
+                    result = before_end + '\n' + injection_code + '\n    ' + after_end
+                    print(f"DEBUG: 注入后的代码长度: {len(result)}")
+                    return result
+                else:
+                    print(f"DEBUG: 代码已经存在，跳过注入")
         
         return code
     
