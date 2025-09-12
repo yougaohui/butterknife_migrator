@@ -1,7 +1,9 @@
 package com.zhongxun.gps365.titleact;
+
 import static com.zhongxun.gps365.util.DateUtil.transform;
 import static com.zhongxun.gps365.util.IOUtils.ChangeIP;
 import static com.zhongxun.gps365.util.IOUtils.log;
+
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
@@ -24,7 +26,9 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
 import com.zhongxun.gps365.R;
 import com.zhongxun.gps365.ZhongXunApplication;
 import com.zhongxun.gps365.adapter.CommonAdapter;
@@ -40,8 +44,10 @@ import com.zhongxun.gps365.util.UIUtils;
 import com.zhongxun.gps365.widget.MProgressDilog;
 import com.zhy.http.okhttp.OkHttpUtils;
 import com.zhy.http.okhttp.callback.StringCallback;
+
 import org.json.JSONArray;
 import org.json.JSONObject;
+
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -52,20 +58,27 @@ import java.util.Locale;
 import java.util.TimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 import okhttp3.Call;
+
 public class Agent_DeviceListActivity extends BaseActivity implements AdapterView.OnItemClickListener {
-    ListView listview;
-    TextView tvAll;
-    TextView tvAlltvAllDeivces;
-    EditText finddevice;//密码
-    TextView tbCancel;
-    TextView tvAgent;
-    TextView tbFind;
+    @BindView(R.id.listview) ListView listview;
+    @BindView(R.id.tvAll) TextView tvAll;
+    @BindView(R.id.tvAllDeivces) TextView tvAlltvAllDeivces;
+    @BindView(R.id.finddevice) EditText finddevice;//密码
+    @BindView(R.id.tbCancel) TextView tbCancel;
+    @BindView(R.id.tvAgent) TextView tvAgent;
+    @BindView(R.id.tbFind) TextView tbFind;
     TextView tvDevices;
     private List<DeviceListBean> allListBeans = new ArrayList<DeviceListBean>();//所有
     private List<DeviceListBean> findListBeans = new ArrayList<DeviceListBean>();//离线
+
     private DeviceAdapter allAdapter;
     private DeviceAdapter findAdapter;
+
     private Timer timer = new Timer();
     private String user;
     private String word;
@@ -79,11 +92,13 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
         finish();
         return;
     }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.agent_device_lists);
+        ButterKnife.bind(this);
         //log("Agent Device list onCreate");
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         tvDevices = (TextView) findViewById(R.id.tvDevices);
@@ -107,72 +122,13 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
                     }
                 });
             }
-                listview = (ListView) findViewById(R.id.listview);
-        tvAll = (TextView) findViewById(R.id.tvAll);
-        tvAlltvAllDeivces = (TextView) findViewById(R.id.tvAllDeivces);
-        finddevice = (EditText) findViewById(R.id.finddevice);
-        tbCancel = (TextView) findViewById(R.id.tbCancel);
-        tvAgent = (TextView) findViewById(R.id.tvAgent);
-        tbFind = (TextView) findViewById(R.id.tbFind);
-                view_tvAgent.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onClick(v);
-            }
         });
-        view_tvapw.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onClick(v);
-            }
-        });
-        view_tvRefresh.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onClick(v);
-            }
-        });
-        view_tvAllDeivces.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onClick(v);
-            }
-        });
-        view_tvAll.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onClick(v);
-            }
-        });
-        view_tvOnline.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onClick(v);
-            }
-        });
-        view_tvOffline.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onClick(v);
-            }
-        });
-        view_tbCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onClick(v);
-            }
-        });
-        view_tbFind.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onClick(v);
-            }
-        });
-    });
+
         mProgressDilog = new MProgressDilog(this);
         if (mProgressDilog != null) {
             mProgressDilog.dissmissProgressDilog();
         }
+
         if ( Config.agent ) {
             tvAgent.setVisibility(View.INVISIBLE);
             tvDevices.setText( Config.PW + " " + UIUtils.getString(R.string.device_list));
@@ -198,6 +154,7 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
         filter.addAction("android.intent.action.SCREEN_OFF");
         filter.addAction("android.intent.action.SCREEN_ON");
         RegisterReceiverHelper.registerReceiver(mContext,receiver, filter);
+
         finddevice = (EditText) findViewById(R.id.finddevice);
         finddevice.addTextChangedListener(textWatcher);
         /*finddevice.setOnKeyListener(new View.OnKeyListener() {
@@ -207,6 +164,7 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
                        String AG = Config.MasterAgent;
                        findDeviceInfos( AG );
                    } else {
+
                    }
                    return true;
                } else if (  keyCode == KeyEvent.KEYCODE_BACK ) {
@@ -218,16 +176,20 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
            }
         });*/
         tvAlltvAllDeivces.setVisibility(View.GONE);
-    
-        initViews();
-        initListener();}
+    }
+
     private TextWatcher textWatcher = new TextWatcher() {
+
         @Override
         public void afterTextChanged(Editable s) {
+
         }
+
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
         }
+
         @Override
         public void onTextChanged(CharSequence s, int start, int before, int count) {
             String str = finddevice.getText().toString();
@@ -267,9 +229,11 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
             }
         }
     };
+
     private void initEvent() {
         listview.setOnItemClickListener(this);
     }
+
     private void initOtherData() {
         //   onlineListBeans.clear();//清空在线
         //   offlineListBeans.clear();//清空离线
@@ -278,23 +242,28 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
         //        if (deviceListBean.getFlag().equals("online")) {//线上的数据集合
         //       onlineListBeans.add(deviceListBean);
         //        }
+
         //       if (deviceListBean.getFlag().equals("offline")) {//离线的数据集合
         //      offlineListBeans.add(deviceListBean);
         //       }
         //    }
     }
+
     //直接对集合操作
     private void initAllData() {
         //清空集合,再添加  如果一开始集合中有数据的情况下
         allListBeans.clear();
+
         //第一条显示的string数据(不变的数据)名称+imei
         String deviceDes = null;
         //组成电量+在线状态+速度   如果log为null的情况下直接设置--没有数据
         String deviceStatus = null;
+
         //左侧图标的id
         int leftId = 0;//初始化
         //右侧图标的id
         int rightId = 0;
+
         //从全局的list中取出数据放进新的集合中
         //三个集合all online offline
         //左侧读取log(在线/离线---决定图片的颜色)和icon(0/1/2/3---网络/基站/WiFi)的信息--log中不含有in/off的时候显示没有数据
@@ -306,6 +275,7 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
         int off = 0;
         user = preferenceUtil.getString(Config.USERNAME);
         word = preferenceUtil.getString(Config.PASSWORD);
+
         for (int i = 0; i < ZhongXunApplication.currentDeviceList.size(); i++) {//全部的设备信息
             all ++;
             DeviceInfo deviceBean = ZhongXunApplication.currentDeviceList.get(i);
@@ -331,6 +301,7 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
                 }
             } catch (Exception e) {
             }
+
             deviceDes = allName + "[" + allImei + "]" ;
             try {
                 if ( !ver.equals(model) && !model.equals("") && !ver.equals("") && !ver.equals("0") ) {
@@ -339,9 +310,11 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
                 }
             } catch (Exception e) {
             }
+
             String status = null;//线上/离线
             //解析log中的数据
             // log time , lat,lng, spd, deg ,sate, source
+
             Calendar NowDate = Calendar.getInstance(TimeZone.getTimeZone("GMT0"));
             NowDate.add(Calendar.HOUR, -8);
             String logtime = "";
@@ -351,6 +324,7 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
                 logtime = log.substring(4);
             else if ( log.startsWith("20"))
                 logtime = log;
+
             int mins  = 999999 ;
             if ( !logtime.equals("")) {
                 SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH);
@@ -358,6 +332,7 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
                 Date strtodate = formatter.parse(logtime, pos);
                 mins = MapUtil.minsBetween(strtodate, NowDate.getTime());
             }
+
             if (log != null && !log.equals("null") && splitData.length >= 5) {//在设备数据不为空的情况下-------设置左侧图标---------
                 if ( ( log.startsWith("IN") || log.startsWith("CH") ) && allGps != null && !allGps.equals("null") ) {//在线  根据不同的状态设置图片的颜色(log的信息以IN开头)
                     on ++;
@@ -402,8 +377,10 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
                     deviceStatus = UIUtils.getString(R.string.data_error);
                     leftId = R.drawable.nodata;
                 }
+
                 //"gps": time, sate, typ, spd, deg,
                 //"gps": "2017-03-06 11:15:58, 3 ,1 ,0 ,0",
+
                 if (allGps != null && !allGps.equals("null") ) {//不为空的情况下提取出速度值,判断时候大于0
                     String speed = null;
                     //String[] splitData = allGps.split(",");
@@ -421,6 +398,7 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
+
                     /*if ("0".equals(deviceSpeed)) {//静止
                         speed = UIUtils.getString(R.string.still);//UIUtils.getString(R.string.still)
                     } else */
@@ -444,6 +422,7 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
                     leftId = R.drawable.nodata;
                 }
                 //电量为空的情况下
+
             } else if ( log != null && !log.equals("null") && ( splitData.length < 5 || allGps == null || allGps.equals("null"))) {//log为空的情况下,设备数据为空的情况下   ---左侧图标---
                 leftId = R.drawable.nodata;
                 if (log.startsWith("IN") || log.startsWith("CH")  ) {//在线  根据不同的状态设置图片的颜色(log的信息以IN开头)
@@ -471,6 +450,7 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
                 deviceListBean.setFlag("empty");
                 deviceStatus = UIUtils.getString(R.string.data_error);
             }
+
     /*        switch (allPic) {//右侧小图标    ----右侧小图标----
                 case "0": //6001  默认的情况下
                     rightId = R.drawable.m0;
@@ -519,6 +499,9 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
         //    tvOnline.setText(UIUtils.getString(R.string.online) + "("+ on +")");
         //   tvOffline.setText( DeviceStatusStringUtils.getOffline() + "("+ off +")");
     }
+
+
+
     //直接对集合操作
     private void initfindData(String findName) {
         //清空集合,再添加  如果一开始集合中有数据的情况下
@@ -531,18 +514,21 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
         int leftId = 0;//初始化
         //右侧图标的id
         int rightId = 0;
+
         //从全局的list中取出数据放进新的集合中
         //三个集合all online offline
         //左侧读取log(在线/离线---决定图片的颜色)和icon(0/1/2/3---网络/基站/WiFi)的信息--log中不含有in/off的时候显示没有数据
         //上面文字:name(设备名称+[imei])
         //中间文字:bat(电池)+log(离线/在线)+gps(0代表静止)
         //右侧图标:pic(根据类型设置不同的图片)
+
         for (int i = 0; i < ZhongXunApplication.currentDeviceList.size(); i++) {//全部的设备信息
             // LogUtils.i("sanmysize-------:"+ZhongXunApplication.currentDeviceList.size());
             DeviceInfo deviceBean = ZhongXunApplication.currentDeviceList.get(i);
             //先存储所有数据----->>(注意里面的数据有可能为空--null)
             String allName = deviceBean.name;//名称
             String allImei = deviceBean.imei;//imei
+
             if ( allName.indexOf(findName) > -1 || allImei.indexOf(findName) > -1 )  {
                 chk = true ;
                 String allBat = deviceBean.bat;//电量
@@ -565,6 +551,7 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
                     logtime = log.substring(4);
                 else if ( log.startsWith("20"))
                     logtime = log;
+
                 int mins  = 999999 ;
                 if ( !logtime.equals("")) {
                     SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH);
@@ -572,6 +559,7 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
                     Date strtodate = formatter.parse(logtime, pos);
                     mins = MapUtil.minsBetween(strtodate, NowDate.getTime());
                 }
+
                 if (log != null && !log.equals("null") && splitData.length >= 5 ) {//在设备数据不为空的情况下-------设置左侧图标---------
                     if (log.startsWith("IN") || log.startsWith("CH")  ) {//在线  根据不同的状态设置图片的颜色(log的信息以IN开头)
                         deviceListBean.setFlag("online");
@@ -627,6 +615,7 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
                                 break;
                         }*/
                     }
+
                     String speed = null;
                     //"gps": "2017-03-06 11:15:58,22.575768,113.912766,0,0",
                     if (allGps != null) {//不为空的情况下提取出速度值,判断时候大于0
@@ -645,6 +634,7 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
+
                     /*if ("0".equals(deviceSpeed)) {//静止
                         speed = UIUtils.getString(R.string.still);//UIUtils.getString(R.string.still)
                     } else */
@@ -667,6 +657,7 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
                     deviceStatus = UIUtils.getString(R.string.data_error);
                     leftId = R.drawable.nodata;
                 }
+
             /*    switch (allPic) {//右侧小图标    ----右侧小图标----
                     case "0": //6001  默认的情况下
                         rightId = R.drawable.m0;
@@ -716,6 +707,8 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
             // Toast.makeText(Agent_DeviceListActivity.this, UIUtils.getString(R.string.data_error), Toast.LENGTH_SHORT).show();
         }
     }
+
+    @OnClick({R.id.tvAgent, R.id.tvapw, R.id.tvRefresh, R.id.tvAllDeivces, R.id.tvAll, R.id.tvOnline, R.id.tvOffline, R.id.tbCancel, R.id.tbFind })
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.tvapw:
@@ -814,6 +807,7 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
                 btnCancel.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+
                         dialog2.dismiss();
                         //记录当前点击的选项,默认为所有的设备
                         preferenceUtil.putInt(Config.SELECTSTATUS, -1);
@@ -858,12 +852,15 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
                         dialog2.dismiss();
                     }
                 });
+
                 builder2.setView(timeSelView);
                 dialog2 = builder2.create();
                 dialog2.show();
+
                 break;*/
         }
     }
+
     private void SubmitData(final int typ) {
         String url = null;
         //log("MasterAgent:" + Config.MasterAgent + "\nConfig.PW:" + Config.PW);
@@ -892,6 +889,7 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
                         }
                         return;
                     }
+
                     @Override
                     public void onResponse(String response, int id) {
                             log(getApplicationContext(), response);
@@ -914,6 +912,8 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
             mProgressDilog.dissmissProgressDilog();
         }
     }
+
+
     //崩溃的时候listview中列表的数据混乱了
     private DeviceInfo device;
     @Override
@@ -926,6 +926,7 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
         } else {
             listBean = findListBeans.get(position);
         }
+
         /*switch (selectstatus) {
             case -1://当前选中项为所有设备
                 listBean = allListBeans.get(position);//集合中获取当前点击的对象
@@ -974,10 +975,13 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
             e.printStackTrace();
         }
     }
+
     public class DeviceAdapter extends CommonAdapter<DeviceListBean> {
+
         public DeviceAdapter(Context context, List<DeviceListBean> datas, int layoutId) {
             super(context, datas, layoutId);
         }
+
         @Override
         public void convert(ViewHolder holder, DeviceListBean deviceListBean) {
             holder.setBackgroundRes(R.id.netState, deviceListBean.getLeftIcon());
@@ -986,13 +990,16 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
             holder.setBackgroundRes(R.id.tvIcon, deviceListBean.getRightIcon());
         }
     }
+
     @Override
     protected void onResume() {
         super.onResume();
+
         if ( !Config.agent ) {
             user = preferenceUtil.getString(Config.USERNAME);
             word = preferenceUtil.getString(Config.PASSWORD);
             preferenceUtil.putInt(Config.SELECTSTATUS, -1);//每当activity可见的时候设置选中的为all界面
+
             refreshTime = preferenceUtil.getInt(Config.ZX_REFRESH_TIME);
             if (refreshTime == 0) {
                 preferenceUtil.putInt(Config.ZX_REFRESH_TIME, 180);
@@ -1016,13 +1023,16 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
             }, new Date(), refreshTime * 1000);
         }
     }
+
     //获取当前账号所有设备的信息
     public  void getAgentDeviceInfos(final String AG) {
         String url ;
+
         if ( AG.indexOf(";") > -1 ) {
             try {
                 String[] agData = AG.split(";");
                 url = Config.SERVER_URL + Config.APP + "_aglist.php?typ=" + agData[1] + "&level=" + agData[3] + "&agent=" + agData[0] + "&sub=" + agData[2] + "&tm=" +MapUtil.getzone(this) ;
+
             } catch (Exception e) {
                 url = "";
             }
@@ -1068,6 +1078,7 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
                             }
                             return;
                         }
+
                         @Override
                         public void onResponse(String response, int id) {
                             log(getApplicationContext(), response);
@@ -1111,12 +1122,15 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
                                     } else {
                                         locSubmit = "[" + "]";
                                     }
+
                                     preferenceUtil.putBoolean(Config.ISLOGIN, true);
                                     preferenceUtil.putBoolean(Config.ISREGU, true);
                                     //    log("getAgentDeviceInfos 88" );
                                 }
+
                                 JSONArray jsonArray = new JSONArray(response);
                                 String locateData = "";//定位数据
+
                                 for (int i = 0; i < jsonArray.length(); i++) {
                                     JSONObject jsonObject = jsonArray.getJSONObject(i);//使用单个单个账号登录的时候
                                     String type = jsonObject.getString("device");
@@ -1125,14 +1139,17 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
                                     //}
                                 }
                                 preferenceUtil.putInt(Config.ZX_LOCSIZE, locSize);
+
                                 String locSubmit = null;
                                 if (!TextUtils.isEmpty(locateData)) {
                                     locSubmit = "[" + locateData.substring(0, locateData.length() - 1) + "]";//定位保存数据
                                 } else {
                                     locSubmit = "[" + "]";
                                 }
+
                                 preferenceUtil.putString(Config.ZX_LOCATE_INFO, locSubmit);//定位数据
                                 preferenceUtil.putBoolean(Config.ISLOGIN, true);
+
                                 ZhongXunApplication.initData(ZhongXunApplication.currentImei);//原来的不变
                                 initAllData();
                                 initOtherData();
@@ -1161,6 +1178,7 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
                                 allAdapter = new DeviceAdapter(Agent_DeviceListActivity.this, allListBeans, R.layout.item_agentdevicelist);
                                 listview.setAdapter(allAdapter);
                             } catch (Exception e) {
+
                             }
                             if (mProgressDilog != null) {
                                 mProgressDilog.dissmissProgressDilog();
@@ -1172,75 +1190,11 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
             //log("get Agent Device List1 " + AG );
         }
         //} else {
-    private void initListener() {
-        view_tvAgent.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onClick(v);
-            }
-        });
-        view_tvapw.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onClick(v);
-            }
-        });
-        view_tvRefresh.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onClick(v);
-            }
-        });
-        view_tvAllDeivces.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onClick(v);
-            }
-        });
-        view_tvAll.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onClick(v);
-            }
-        });
-        view_tvOnline.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onClick(v);
-            }
-        });
-        view_tvOffline.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onClick(v);
-            }
-        });
-        view_tbCancel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onClick(v);
-            }
-        });
-        view_tbFind.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onClick(v);
-            }
-        });
-        // 初始化点击事件 - 替换@OnClick注解
-        findViewById(R.id.tvAgent).setOnClickListener(v -> onClick(v));
-        findViewById(R.id.tvapw).setOnClickListener(v -> onClick(v));
-        findViewById(R.id.tvRefresh).setOnClickListener(v -> onClick(v));
-        findViewById(R.id.tvAllDeivces).setOnClickListener(v -> onClick(v));
-        findViewById(R.id.tvAll).setOnClickListener(v -> onClick(v));
-        findViewById(R.id.tvOnline).setOnClickListener(v -> onClick(v));
-        findViewById(R.id.tvOffline).setOnClickListener(v -> onClick(v));
-        findViewById(R.id.tbCancel).setOnClickListener(v -> onClick(v));
-        findViewById(R.id.tbFind).setOnClickListener(v -> onClick(v));
-    }
         //    log("get Agent Device List2 " + AG  );
         //}
     }
+
+
     //获取当前账号所有设备的信息
     public  void getDeviceInfos(final String userName, final String passWord, final int no ){
         String url ;
@@ -1283,14 +1237,17 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
                             mRefreshLayout.setRefreshing(false);
                             return;
                         }
+
                         @Override
                         public void onResponse(String response, int id) {
                             log(getApplicationContext(), response);
                             //  log("getDeviceInfos:" + response);
+
                             if (response.length() <= 18) {
                                 if (mProgressDilog != null) {
                                     mProgressDilog.dissmissProgressDilog();
                                 }
+
                                 Toast.makeText(Agent_DeviceListActivity.this, UIUtils.getString(R.string.nodata), Toast.LENGTH_SHORT).show();
                                 mRefreshLayout.setRefreshing(false);
                                 return;
@@ -1347,13 +1304,16 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
                         }
                     });
         }
+
         if (mProgressDilog != null) {
             mProgressDilog.dissmissProgressDilog();
         }
         mRefreshLayout.setRefreshing(false);
     }
+
     public  void agentgetDeviceInfos(final String userName, final String passWord, final int no ){
         String url = null;
+
         int loginMode = preferenceUtil.getInt(Config.ZX_LOGIN_MODE);
         if ( finddevice.getText().length() == 15 ) {
             String AG = Config.MasterAgent;
@@ -1383,6 +1343,7 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
                             mRefreshLayout.setRefreshing(false);
                             return;
                         }
+
                         @Override
                         public void onResponse(String response, int id) {
                             log(getApplicationContext(), response);
@@ -1396,6 +1357,7 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
                                 return;
                             }
                             int locSize = 0;//界面设备个数,默认是0个
+
                             try {
                                 JSONArray jsonArray = new JSONArray(response);
                                 String locateData = "";//定位数据
@@ -1423,6 +1385,7 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
                                 }
                                 //log("getDeviceInfos 4:");
                                 ZhongXunApplication.initData(ZhongXunApplication.currentImei);//原来的不变
+
                                 if (flag) {
                                     Toast.makeText(Agent_DeviceListActivity.this, UIUtils.getString(R.string.refresh_finish), Toast.LENGTH_SHORT).show();
                                     flag = false;
@@ -1433,18 +1396,22 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
+
                             if (mProgressDilog != null) {
                                 mProgressDilog.dissmissProgressDilog();
                             }
                             // log("getDeviceInfos 8:");
                         }
                     });
+
         }
+
         if (mProgressDilog != null) {
             mProgressDilog.dissmissProgressDilog();
         }
         mRefreshLayout.setRefreshing(false);
     }
+
     @Override
     protected void onPause() {
         super.onPause();
@@ -1453,6 +1420,7 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
             timer = null;
         }
     }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -1461,6 +1429,7 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
             timer = null;
         }
     }
+
     public class ScreenStatusReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -1491,6 +1460,7 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
             }
         }
     }
+
     private String isConnected() {
         try {
             ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -1508,6 +1478,7 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
         }
         return "NULL";
     }
+
     private boolean isNetworkConnected(Context context) {
         try {
              if (context != null) {
@@ -1522,16 +1493,5 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
             e.printStackTrace();
         }
         return false;
-    }
-
-    protected void initViews() {
-        // 初始化View绑定 - 替换@BindView注解
-        listview = findViewById(R.id.listview);
-        tvAll = findViewById(R.id.tvAll);
-        tvAlltvAllDeivces = findViewById(R.id.tvAllDeivces);
-        finddevice = findViewById(R.id.finddevice);
-        tbCancel = findViewById(R.id.tbCancel);
-        tvAgent = findViewById(R.id.tvAgent);
-        tbFind = findViewById(R.id.tbFind);
     }
 }
