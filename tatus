@@ -1,0 +1,5 @@
+[33m52824bd[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m)[m 修复ButterKnife迁移工具的关键问题
+[33m3cf4820[m 修复@OnLongClick注解移除问题：使用正则表达式匹配忽略缩进，支持boolean返回类型
+[33m93222a6[m 添加@OnLongClick注解支持：解析、移除和生成setOnLongClickListener代码
+[33m2a03a2b[m 修复现有initViews方法更新逻辑：在现有代码末尾追加新代码，避免重复调用
+[33m34c46a4[m[33m ([m[1;31morigin/main[m[33m)[m 修复R2.id编译错误：在生成代码时将R2.id转换为R.id

@@ -1110,6 +1110,18 @@ public class Agent_DeviceListActivity extends BaseActivity implements AdapterVie
             //log("get Agent Device List1 " + AG );
         }
         //} else {
+    private void initListener() {
+        // 初始化点击事件 - 替换@OnClick注解
+        findViewById(R.id.tvAgent).setOnClickListener(v -> onClick(v));
+        findViewById(R.id.tvapw).setOnClickListener(v -> onClick(v));
+        findViewById(R.id.tvRefresh).setOnClickListener(v -> onClick(v));
+        findViewById(R.id.tvAllDeivces).setOnClickListener(v -> onClick(v));
+        findViewById(R.id.tvAll).setOnClickListener(v -> onClick(v));
+        findViewById(R.id.tvOnline).setOnClickListener(v -> onClick(v));
+        findViewById(R.id.tvOffline).setOnClickListener(v -> onClick(v));
+        findViewById(R.id.tbCancel).setOnClickListener(v -> onClick(v));
+        findViewById(R.id.tbFind).setOnClickListener(v -> onClick(v));
+    }
         //    log("get Agent Device List2 " + AG  );
         //}
     }

@@ -200,32 +200,18 @@ class CodeInjector:
                         # 检查方法是否有View参数
                         has_view_param = on_click.get('has_view_param', True)  # 默认为True保持向后兼容
                         
-                        # 检查这个View是否已经在@BindView中声明
-                        bind_view_ids = {bind_view['id'] for bind_view in bind_views}
-                        
-                        if resource_id in bind_view_ids:
-                            # 如果View已经在@BindView中声明，直接使用成员变量
-                            if has_view_param:
-                                param_type = on_click.get('param_type', 'View')
-                                if param_type == 'View':
-                                    init_listener_lines.append(f"        {view_name}.setOnClickListener(v -> {method_name}(v));")
-                                else:
-                                    init_listener_lines.append(f"        {view_name}.setOnClickListener(v -> {method_name}(({param_type}) v));")
+                        # 对于普通Activity，统一使用findViewById，不使用成员变量
+                        # 将R2.id转换为R.id
+                        if resource_id.startswith('R2.id.'):
+                            resource_id = resource_id.replace('R2.id.', 'R.id.')
+                        if has_view_param:
+                            param_type = on_click.get('param_type', 'View')
+                            if param_type == 'View':
+                                init_listener_lines.append(f"        findViewById({resource_id}).setOnClickListener(v -> {method_name}(v));")
                             else:
-                                init_listener_lines.append(f"        {view_name}.setOnClickListener(v -> {method_name}());")
+                                init_listener_lines.append(f"        findViewById({resource_id}).setOnClickListener(v -> {method_name}(({param_type}) v));")
                         else:
-                            # 如果View没有在@BindView中声明，直接在initListener中获取并设置监听器
-                            # 将R2.id转换为R.id
-                            if resource_id.startswith('R2.id.'):
-                                resource_id = resource_id.replace('R2.id.', 'R.id.')
-                            if has_view_param:
-                                param_type = on_click.get('param_type', 'View')
-                                if param_type == 'View':
-                                    init_listener_lines.append(f"        findViewById({resource_id}).setOnClickListener(v -> {method_name}(v));")
-                                else:
-                                    init_listener_lines.append(f"        findViewById({resource_id}).setOnClickListener(v -> {method_name}(({param_type}) v));")
-                            else:
-                                init_listener_lines.append(f"        findViewById({resource_id}).setOnClickListener(v -> {method_name}());")
+                            init_listener_lines.append(f"        findViewById({resource_id}).setOnClickListener(v -> {method_name}());")
                         init_listener_lines.append("")
         
         if on_long_clicks:
@@ -242,32 +228,18 @@ class CodeInjector:
                         # 检查方法是否有View参数
                         has_view_param = on_long_click.get('has_view_param', True)  # 默认为True保持向后兼容
                         
-                        # 检查这个View是否已经在@BindView中声明
-                        bind_view_ids = {bind_view['id'] for bind_view in bind_views}
-                        
-                        if resource_id in bind_view_ids:
-                            # 如果View已经在@BindView中声明，直接使用成员变量
-                            if has_view_param:
-                                param_type = on_long_click.get('param_type', 'View')
-                                if param_type == 'View':
-                                    init_listener_lines.append(f"        {view_name}.setOnLongClickListener(v -> {method_name}(v));")
-                                else:
-                                    init_listener_lines.append(f"        {view_name}.setOnLongClickListener(v -> {method_name}(({param_type}) v));")
+                        # 对于普通Activity，统一使用findViewById，不使用成员变量
+                        # 将R2.id转换为R.id
+                        if resource_id.startswith('R2.id.'):
+                            resource_id = resource_id.replace('R2.id.', 'R.id.')
+                        if has_view_param:
+                            param_type = on_long_click.get('param_type', 'View')
+                            if param_type == 'View':
+                                init_listener_lines.append(f"        findViewById({resource_id}).setOnLongClickListener(v -> {method_name}(v));")
                             else:
-                                init_listener_lines.append(f"        {view_name}.setOnLongClickListener(v -> {method_name}());")
+                                init_listener_lines.append(f"        findViewById({resource_id}).setOnLongClickListener(v -> {method_name}(({param_type}) v));")
                         else:
-                            # 如果View没有在@BindView中声明，直接在initListener中获取并设置监听器
-                            # 将R2.id转换为R.id
-                            if resource_id.startswith('R2.id.'):
-                                resource_id = resource_id.replace('R2.id.', 'R.id.')
-                            if has_view_param:
-                                param_type = on_long_click.get('param_type', 'View')
-                                if param_type == 'View':
-                                    init_listener_lines.append(f"        findViewById({resource_id}).setOnLongClickListener(v -> {method_name}(v));")
-                                else:
-                                    init_listener_lines.append(f"        findViewById({resource_id}).setOnLongClickListener(v -> {method_name}(({param_type}) v));")
-                            else:
-                                init_listener_lines.append(f"        findViewById({resource_id}).setOnLongClickListener(v -> {method_name}());")
+                            init_listener_lines.append(f"        findViewById({resource_id}).setOnLongClickListener(v -> {method_name}());")
                         init_listener_lines.append("")
         
         return {
@@ -922,7 +894,14 @@ class CodeInjector:
                     break
         
         if method_start != -1 and method_end != -1:
-            # 在方法结束前（最后一个}之前）追加新内容
+            # 对于initListener方法，完全替换内容以避免重复代码
+            if method_name == 'initListener':
+                print(f"DEBUG: 完全替换{method_name}方法内容")
+                new_content_lines = new_content.split('\n')
+                new_lines = lines[:method_start+1] + new_content_lines + lines[method_end:]
+                return '\n'.join(new_lines)
+            
+            # 对于其他方法，在方法结束前（最后一个}之前）追加新内容
             # 检查是否已经有ButterKnife迁移的注释，避免重复添加
             existing_content = '\n'.join(lines[method_start + 1:method_end])
             if "// 初始化View绑定 - 替换@BindView注解" in existing_content or "// 初始化点击事件 - 替换@OnClick注解" in existing_content:
